@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-model href="https://raw.githubusercontent.com/LTAC-Global/TBX-Core_dialect/master/Schemas/TBXcoreStructV03_TBX-Core_integrated.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="https://raw.githubusercontent.com/LTAC-Global/TBX-Core_dialect/master/Schemas/TBX-Core.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<tbx xmlns="urn:iso:std:iso:30042:ed-2" type="TBX-Core" style="dca" xml:lang="en">
+  <tbxHeader>
+    <fileDesc>
+      <sourceDesc>
+        <p>TBX file, created via dnb/terminator</p>
+      </sourceDesc>
+    </fileDesc>
+  </tbxHeader>
+  <text>
+    <body>
+      <conceptEntry id="c1">
+        <langSec xml:lang="en">
+          <termSec>
+            <term>open cluster</term>
+            <note>Another name for an open star cluster. They are often termed Galactic Clusters because they are found mainly in the plane of our galaxy. If you were to view our galaxy from afar, you would find that all the open/galactic clusters lie within the spiral arms of the galaxy.</note>
+            <note>N-Source: 
+http://www.delscope.demon.co.uk/astronomy/glossary.htm#G</note>
+            <descrip/>
+          </termSec>
+        </langSec>
+      </conceptEntry>
+    </body>
+  </text>
+</tbx>
