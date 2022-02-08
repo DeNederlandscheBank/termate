@@ -8,8 +8,9 @@ import nafigator
 NAMESPACES = {
     None: "urn:iso:std:iso:30042:ed-2",
 }
-TBX_CORE = 'href="https://raw.githubusercontent.com/LTAC-Global/TBX-Core_dialect/master/Schemas/TBXcoreStructV03_TBX-Core_integrated.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"'
-SCHEMATRON_CORE = 'href="https://raw.githubusercontent.com/LTAC-Global/TBX-Core_dialect/master/Schemas/TBX-Core.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"'
+RELAXNG_TBX_BASIC = 'href="https://raw.githubusercontent.com/LTAC-Global/TBX-Core_dialect/master/Schemas/TBXcoreStructV03_TBX-Basic_integrated.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"'
+SCHEMA_TBX_BASIC = 'href="https://raw.githubusercontent.com/LTAC-Global/TBX-Core_dialect/master/Schemas/TBX-Basic.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"'
+
 XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
 
 TBXHEADER = "tbxHeader"
@@ -18,8 +19,6 @@ SOURCEDESC = "sourceDesc"
 TEXT = "text"
 BODY = "body"
 TITLE = "title"
-
-ILLEGAL_TERM_CHARACTERS = ["„", "”", ">", "<", ",", "α", "β", "σ", "ð", "þ", "%", "δ"]
 
 def QName(prefix: str = None, name: str = None):
     """ """
@@ -37,11 +36,11 @@ class TbxDocument(etree._ElementTree):
         """Initialize a TbxDocument with data from the params dict"""
         self._setroot(
             etree.Element(
-                "tbx", attrib={"type": "TBX-Core", "style": "dca"}, nsmap=NAMESPACES
+                "tbx", attrib={"type": "TBX-Basic", "style": "dca"}, nsmap=NAMESPACES
             )
         )
-        pi1 = etree.ProcessingInstruction("xml-model", TBX_CORE)
-        pi2 = etree.ProcessingInstruction("xml-model", SCHEMATRON_CORE)
+        pi1 = etree.ProcessingInstruction("xml-model", RELAXNG_TBX_BASIC)
+        pi2 = etree.ProcessingInstruction("xml-model", SCHEMA_TBX_BASIC)
         self.getroot().addprevious(pi1)
         self.getroot().addprevious(pi2)
         self.set_language("en")
@@ -86,16 +85,24 @@ class TbxDocument(etree._ElementTree):
         for xml_concept in self.findall("text/body/conceptEntry", namespaces=NAMESPACES):
             concept = {}
             concept['id'] = xml_concept.attrib["id"]
+            concept['lang'] = {}
             for xml_lang_sec in xml_concept:
-                lang = xml_lang_sec.attrib[XML_LANG]
-                concept['lang'] = {lang: list()}
-                for xml_term_sec in xml_lang_sec:
-                    for item in xml_term_sec:
-                        concept['lang'][lang].append(
-                            {
-                                "type": etree.QName(item.tag).localname,
-                                "attr": item.attrib,
-                                "text": item.text})
+                if xml_lang_sec.tag == QName(name="langSec"):
+                    lang = xml_lang_sec.attrib[XML_LANG]
+                    concept['lang'][lang] = list()
+                    for xml_term_sec in xml_lang_sec:
+                        termsec = list()
+                        for item in xml_term_sec:
+                            termsec.append(
+                                {
+                                    "type": etree.QName(item.tag).localname,
+                                    "attr": item.attrib,
+                                    "text": item.text})
+                        concept['lang'][lang].append(termsec)
+                else:
+                    concept[etree.QName(xml_lang_sec.tag).localname] = {
+                                    "attr": xml_lang_sec.attrib,
+                                    "text": xml_lang_sec.text}
             concepts.append(concept)
         return concepts        
 
@@ -104,9 +111,11 @@ class TbxDocument(etree._ElementTree):
         d = {}
         for concept in self.concepts_list:
             for lang in concept['lang'].values():
-                terms = [item['text'] for item in lang if item['type']=="term"]
-                termnotes = [item for item in lang if item['type']=="termNote"]
-            termnotes = {term_note['attr']['type']: term_note['text'] for term_note in termnotes}
+                terms = [item['text'] for termsec in lang for item in termsec if item['type']=="term"]
+                termnotes = [item for termsec in lang for item in termsec if item['type']=="termNote"]
+                refs = [item for termsec in lang for item in termsec if item['type']=="ref"]
+            termnotes = {termnote['attr']['type']: termnote['text'] for termnote in termnotes}
+            refs = [ref['text'] for ref in refs]
             for term in terms:
                 d[term] = [termnotes]
         return d
@@ -147,14 +156,15 @@ class TbxDocument(etree._ElementTree):
         """Set language of the TbxDocument"""
         self.getroot().set(XML_LANG, language)
 
-    def validate(self, validation_file: str=""):
-        if validation_file[-3:].lower()=="rng":
-            stream = open(validation_file)
-            relaxng = etree.RelaxNG(etree.parse(stream))
-            success = relaxng.validate(self.getroot())
-            if not success:
-                print(relaxng.error_log)
-            return success
+    def validate(self, validation_file: str=None):
+        if validation_file is not None:
+            if validation_file[-3:].lower()=="rng":
+                stream = open(validation_file)
+                relaxng = etree.RelaxNG(etree.parse(stream))
+                success = relaxng.validate(self.getroot())
+                if not success:
+                    print(relaxng.error_log)
+                return success
         return None
 
     def write(self, output: str):
@@ -169,97 +179,148 @@ class TbxDocument(etree._ElementTree):
         """
         super().write(output, encoding="utf-8", pretty_print=True, xml_declaration=True)
 
-    def extract_terms(self, doc: nafigator.NafDocument = None, params: dict = {}):
-        """Function to extract terms from a NafDocument and add the terms to TbxDocument
-
-        Args:
-            output:
-
-        Returns:
-            None
-
-        """
-        patterns = [["NOUN"], 
-                    ["ADJ", "NOUN"],
-                    ["ADJ", "NOUN", "NOUN"],
-                    ["ADJ", "ADJ", "NOUN"],
-                    ]
-        if doc is not None:
-            d = {}
-            for pattern in patterns:
-                terms = nafigator.get_terms(pattern, doc)
-                for term in terms:
-                    if not any(
-                        [
-                            ((s in component) or (s == component))
-                            for component in term
-                            for s in ILLEGAL_TERM_CHARACTERS
-                        ]) and "\xad"!=term[-1][-1] and "-"!=term[-1][-1] and "-"!=term[0][0] and not any([len(component)==1 for component in term]):
-                        concept_text = " ".join(term)
-                        concept_text = concept_text.replace(" \xad ", "")
-                        concept_text = concept_text.replace("\xad ", "")
-                        concept_text = concept_text.replace(" \xad", "")
-                        concept_text = concept_text.replace("\xad", "")
-                        if concept_text in d.keys():
-                            d[concept_text]['count'] += 1
-                        else:
-                            d[concept_text] = {"count": 1, "partOfSpeech": pattern}
-
-        for idx, concept_text in enumerate(d.keys()):
-            concept = {
-                "id": "c" + str(idx),
-                "langSec": {
-                    "nl": [
-                        {"type": "term", "text": concept_text},
-                        {
-                            "type": "termNote",
-                            "attr": {"type": "termType"},
-                            "text": "fullForm",
-                        },
-                        {
-                            "type": "termNote",
-                            "attr": {"type": "partOfSpeech"},
-                            "text": ", ".join(d[concept_text]['partOfSpeech']),
-                        },
-                        {
-                            "type": "note",
-                            "text": "extracted from: "
-                            + str(doc.header["fileDesc"]["filename"])
-                            + " (#hits="
-                            + str(d[concept_text]['count'])
-                            + ")",
-                        },
-                    ]
-                },
-            }
-            self.add_conceptEntry(concept, params)
-
-    def add_references_from_tbx(
-        self, reference = None, prefix: str = "", params: dict = {}
+    def copy_terms_from_tbx(
+        self, terms: dict = {}, reference = None, prefix: str = "", params: dict = {}
     ):
         """ 
         This function adds references to the current TbxDocument from another TbXDocument
         for example a IATE tbx-file if the term text of a concept coincides
 
         """
-        concepts = {}
-        for concept in reference.findall("text/body/conceptEntry", namespaces=NAMESPACES):
-            for item in concept.findall("langSec/termSec/term", namespaces=NAMESPACES):
-                concepts[item.text] = concept.attrib["id"]
 
-        for concept in self.findall("text/body/conceptEntry", namespaces=NAMESPACES):
-            concept_id = concept.attrib["id"]
-            for item in concept:
-                if item.tag == "{urn:iso:std:iso:30042:ed-2}langSec":
-                    if item.attrib.get(XML_LANG, "") == "nl":
-                        for item2 in item:
-                            for item3 in item2:
-                                if item3.tag == "{urn:iso:std:iso:30042:ed-2}term":
-                                    if item3.text in concepts.keys():
-                                        note = etree.SubElement(item2, QName(name="ref"))
-                                        note.text = prefix + str(
-                                            concepts[item3.text]
-                                        )
+        # def most_appropriate(l: list = []):
+
+        #     relevance = 0
+        #     for item in l:
+        #         subject = item['descrip']['text']
+        #         if 'insurance' in subject.lower():
+        #             result = item
+        #             relevance = 10
+        #         if ('finance' in subject.lower()) or ('accounting' in subject.lower()):
+        #             if relevance < 8:
+        #                 result = item
+        #                 relevance = 8
+        #         if 'economics' in subject.lower():
+        #             if relevance < 6:
+        #                 result = item
+        #                 relevance = 6
+        #         if ('law' in subject.lower()) or ('EU act' in subject.lower()):
+        #             if relevance < 4:
+        #                 result = item
+        #                 relevance = 4
+        #         if 'statistics' in subject.lower():
+        #             if relevance < 2:
+        #                 result = item
+        #                 relevance = 2
+        #         if 'credit policy' in subject.lower():
+        #             if relevance < 1:
+        #                 result = item
+        #                 relevance = 1
+        #         if relevance == 0:
+        #             result = item
+
+        #     return result
+
+        reference_concepts = {}
+        for item in reference.concepts_list:
+            for language in item['lang'].keys():
+                if language not in reference_concepts.keys():
+                    reference_concepts[language] = {}
+                for termsec in item['lang'][language]:
+                    for term in termsec:
+                        if term['text'].lower() in reference_concepts[language].keys():
+                            reference_concepts[language][term['text'].lower()].append(item)
+                        else:
+                            reference_concepts[language][term['text'].lower()] = [item]
+
+        added_references = dict()
+
+        body = self.find(TEXT + "/" + BODY, namespaces=NAMESPACES)
+        count = len(body)+1
+        for key in terms.keys():
+            language = terms[key]['dc:language']
+            if key in reference_concepts[language].keys():
+                # found = most_appropriate(nl_concepts[key])
+                for found in reference_concepts[language][key]:
+                    if found['id'] in added_references.keys():
+                        concept_entry = added_references[found['id']]
+                        for langSec in concept_entry:
+                            if langSec.tag == QName(name="langSec") and langSec.attrib.get(XML_LANG, "") == language:
+                                for termSec in langSec:
+                                    for item in termSec:
+                                        if key == item.text.lower():
+                                            pos_el = etree.SubElement(termSec, QName(name="termNote"), {"type": "partOfSpeech"})
+                                            pos_el.text = ", ".join(terms[key]['partOfSpeech']).lower()
+                                            count_el = etree.SubElement(termSec, QName(name="note"), {})
+                                            count_el.text = "source: " + str(terms[key]['dc:source']['{http://purl.org/dc/elements/1.1/}uri']) + " (#hits="+str(terms[key]['count'])+")"
+                    else:
+                        concept_entry = etree.SubElement(
+                            body, QName(name="conceptEntry"), attrib={"id": str(count)}
+                        )
+                        descrip = etree.SubElement(concept_entry, QName(name="descrip"), found['descrip']['attr'])
+                        descrip.text = str(found['descrip']['text'])
+                        note = etree.SubElement(concept_entry, QName(name="xref"))
+                        note.text = prefix + str(found['id'])
+                        note = etree.SubElement(concept_entry, QName(name="ref"))
+                        note.text = "https://iate.europa.eu/entry/result/"+str(found['id']+"/en")
+                        for lang in found['lang'].keys():
+                            langSec = etree.SubElement(concept_entry, QName(name="langSec"), {XML_LANG: lang})
+                            for item in found['lang'][lang]:
+                                termSec = etree.SubElement(langSec, QName(name="termSec"))                    
+                                for item2 in item:
+                                    term_item = etree.SubElement(termSec, QName(name=item2.get('type', "empty")), item2.get('attr', {}))
+                                    term_item.text = item2['text']
+                                    if langSec.tag == QName(name="langSec") and langSec.attrib.get(XML_LANG, "") == language:
+                                        if key == item2['text'].lower():
+                                            pos_el = etree.SubElement(termSec, QName(name="termNote"), {"type": "partOfSpeech"})
+                                            pos_el.text = ", ".join(terms[key]['partOfSpeech']).lower()
+                                            count_el = etree.SubElement(termSec, QName(name="note"), {})
+                                            count_el.text = "source: " + str(terms[key]['dc:source']['{http://purl.org/dc/elements/1.1/}uri']) + " (#hits="+str(terms[key]['count'])+")"
+
+                        count += 1
+                        added_references[found['id']] = concept_entry
+            else:
+                # not found
+                if language == "nl":
+                    concept_entry = etree.SubElement(
+                        body, QName(name="conceptEntry"), attrib={"id": str(count)}
+                    )
+                    count += 1
+                    descrip = etree.SubElement(concept_entry, QName(name="descrip"))
+                    descrip.text = "Unknown"
+                    langSec = etree.SubElement(concept_entry, QName(name="langSec"), {XML_LANG: "nl"})
+                    termSec = etree.SubElement(langSec, QName(name="termSec"))                  
+                    term_item = etree.SubElement(termSec, QName(name="term"))
+                    term_item.text = key
+                    term_item = etree.SubElement(termSec, QName(name="termNote"), {"type": "language-planningQualifier"})
+                    term_item.text = "newTerm"
+                    pos_el = etree.SubElement(termSec, QName(name="termNote"), {"type": "partOfSpeech"})
+                    pos_el.text = ", ".join(terms[key]['partOfSpeech']).lower()
+                    count_el = etree.SubElement(termSec, QName(name="note"), {})
+                    count_el.text = "source: " + str(terms[key]['dc:source']['{http://purl.org/dc/elements/1.1/}uri']) + " (#hits="+str(terms[key]['count'])+")"
+            # concept_id = concept.attrib["id"]
+            # found = None
+            # for item in concept:
+            #     if item.tag == QName(name="langSec"):
+            #         if item.attrib.get(XML_LANG, None) == "nl":
+            #             for item2 in item: #termsec
+            #                 for item3 in item2: #termsec item
+            #                     if item3.tag == QName(name="term"):
+            #                         if item3.text in nl_concepts.keys():
+            #                             found = nl_concepts[item3.text]
+            #                             found_text = item3.text
+            # if found is not None:
+            #     descrip = etree.SubElement(concept, QName(name="descrip"), found['descrip']['attr'])
+            #     descrip.text = str(found['descrip']['text'])
+            #     note = etree.SubElement(concept, QName(name="xref"))
+            #     note.text = prefix + str(nl_concepts[found_text]['id'])
+            #     for lang in found['lang'].keys():
+            #         langSec = etree.SubElement(concept, QName(name="langSec"), {XML_LANG: lang})
+            #         for item in found['lang'][lang]:
+            #             termSec = etree.SubElement(langSec, QName(name="termSec"))                    
+            #             for item2 in item:
+            #                 term_item = etree.SubElement(termSec, QName(name=item2.get('type', "empty")), item2.get('attr', {}))
+            #                 term_item.text = item2['text']
 
     def add_termnotes_from_tbx(
         self, reference=None, params: dict = {}
@@ -288,18 +349,21 @@ class TbxDocument(etree._ElementTree):
         for concept in self.findall("text/body/conceptEntry", namespaces=NAMESPACES):
             concept_id = concept.attrib["id"]
             for item in concept:
-                if item.tag == "{urn:iso:std:iso:30042:ed-2}langSec":
+                if item.tag == QName(name="langSec"):
                     if item.attrib.get(XML_LANG, "") == "nl":
-                        for item2 in item:
+                        for item2 in item: # termsec
+                            original_term_pos = None
                             for item3 in item2:
-                                if item3.tag == "{urn:iso:std:iso:30042:ed-2}termNote" and item3.attrib['type']=="partOfSpeech":
+                                if item3.tag == QName(name="termNote") and item3.attrib['type']=="partOfSpeech":
                                     original_term_pos = item3.text.split(", ")
 
                             for item3 in item2:
-                                if item3.tag == "{urn:iso:std:iso:30042:ed-2}term":
+                                if item3.tag == QName(name="term") and original_term_pos is not None:
                                     term_text = item3.text
                                     components_completely_found = []
+
                                     for component_idx, component in enumerate(term_text.split(" ")):
+                                        
                                         original_pos = original_term_pos[component_idx]
                                         data = None
                                         # first the complete term
@@ -352,12 +416,16 @@ class TbxDocument(etree._ElementTree):
                                     if all([component is not None for component in components_completely_found]):
                                         note = etree.SubElement(item2, QName(name="termNote"), attrib={"type": "lemma"})
                                         note.text = " ".join(c[0] for c in components_completely_found)
-                                        note = etree.SubElement(item2, QName(name="termNote"), attrib={"type": "morphoFeats"})
-                                        note.text = ", ".join(c[1] for c in components_completely_found)
+                                        note = etree.SubElement(item2, QName(name="termNote"), attrib={"type": "grammaticalNumber"})
+                                        if ",ev," in components_completely_found[-1][1]:
+                                            note.text = "singular"
+                                        elif ",mv," in components_completely_found[-1][1]:
+                                            note.text = "plural"
+                                        termgroup = etree.SubElement(item2, QName(name="termNoteGrp"))
                                         components = [c[2] for c in components_completely_found]
                                         for c in components:
                                             for cc in c:
-                                                note = etree.SubElement(item2, QName(name="termNote"), attrib={"type": "component"})
+                                                note = etree.SubElement(termgroup, QName(name="termNote"), attrib={"type": "component"})
                                                 note.text = cc
 
     def to_excel(self, output: str):
@@ -373,26 +441,39 @@ class TbxDocument(etree._ElementTree):
         body = self.find(TEXT + "/" + BODY)
         wb = xlsxwriter.Workbook(output)
         worksheet = wb.add_worksheet("Tbx")
-        worksheet.write_row(0, 0, ["id", "language", "term", "notes"])
+        worksheet.write_row(0, 0, ["id", "dc:language", "term", "termType", "partOfSpeech", "grammaticalNumber", "xref"])
         row = 1
-        for concept_entry in body:
-            for lang_sec in concept_entry:
+        for concept in self.findall("text/body/conceptEntry", namespaces=NAMESPACES):
+            for lang_sec in concept:
                 for term_sec in lang_sec:
-                    notes = []
+                    term_text = ""
+                    term_type = ""
+                    term_pos = ""
+                    term_number = ""
+                    term_xref = ""
                     for item in term_sec:
-                        if item.tag == "term":
-                            term = item.text
-                        if item.tag == "note":
-                            notes.append(item.text)
+                        if item.tag == QName(name="term"):
+                            term_text = item.text
+                        if item.tag == QName(name="termNote") and item.attrib['type']=='termType':
+                            term_type = item.text
+                        if item.tag == QName(name="termNote") and item.attrib['type']=='partOfSpeech':
+                            term_pos = item.text
+                        if item.tag == QName(name="termNote") and item.attrib['type']=='grammaticalNumber':
+                            term_number = item.text
+                        if item.tag == QName(name="xref"):
+                            term_xref = item.text
                     worksheet.write_row(
                         row,
                         0,
                         [
-                            concept_entry.attrib["id"],
+                            concept.attrib["id"],
                             lang_sec.attrib[XML_LANG],
-                            term,
-                        ]
-                        + notes,
+                            term_text,
+                            term_type,
+                            term_pos,
+                            term_number,
+                            term_xref
+                        ],
                     )
                     row += 1
         wb.close()

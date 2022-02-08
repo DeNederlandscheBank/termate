@@ -50,45 +50,83 @@ Then we extract terms from the Solvency II Delegated Acts (Dutch version) in NAF
 
 ::
 
-    file = "..\\data\\naf\\Solvency II Delegated Acts - NL.naf.xml"
-    doc = nafigator.NafDocument().open(file)
-    t.extract_terms(doc)
+    # create terms dictionary of subset of languages
+    terms = {}
+    for language in ['NL', 'EN', 'DE', 'FR', 'ES', 'ET', 'DA', 'SV']:
+        DOC_FILE = "..\\..\\nafigator-data\\data\\legislation\\Solvency II Delegated Acts - "+language+".naf.xml"
+        doc = nafigator.NafDocument().open(DOC_FILE)
+        merge_terms_dict(terms, nafigator.extract_terms(doc))
 
 Then we add references from the InterActive Terminology for Europe (IATE) dataset:
 
 ::
 
-    iate_file = "..//data//IATE//IATE_export.tbx"
-    ref = terminator.TbxDocument().open(iate_file)
-    t.add_references_from_tbx(reference=ref, prefix="IATE_")
+    # read the IATE file
+    IATE_FILE = "..//data//iate//IATE_export.tbx"
+    ref = terminator.TbxDocument().open(IATE_FILE)
+    t.copy_terms_from_tbx(terms=terms, reference=ref, prefix="IATE_")
 
 Then we add termnotes from the Dutch Lassy dataset (the small one) including basic insurance terms:
 
 ::
 
-    lassy = terminator.TbxDocument().open("..//data//lassy_with_insurance.tbx")
-    t.add_termnotes_from_tbx(reference=lassy)
+    # read the lassy file
+    LASSY_FILE = "..//data//lassy//lassy_with_insurance.tbx"
+    lassy = terminator.TbxDocument().open(LASSY_FILE)
+    t.add_termnotes_from_tbx(reference=lassy, params = {'number_of_word_components': 4})
 
-Then we have 4289 Dutch legal insurance terms with linguistical properties (lemma, part-of-speech, morphological properties and components) in TermBase eXchange format, for example concept 'c69' defined as (in xml):
 
 ::
 
-      <conceptEntry id="c69">
-        <langSec xml:lang="nl">
-          <termSec>
-            <term>solvabiliteitskapitaalvereiste</term>
-            <termNote type="termType">fullForm</termNote>
-            <termNote type="partOfSpeech">NOUN</termNote>
-            <note>extracted from: data/Solvency II Delegated Acts - NL.txt (#hits=331)</note>
-            <ref>IATE_2246604</ref>
-            <termNote type="lemma">solvabiliteits_kapitaalvereiste</termNote>
-            <termNote type="morphoFeats">(soort,mv,basis)</termNote>
-            <termNote type="component">solvabiliteits-</termNote>
-            <termNote type="component">kapitaal-</termNote>
-            <termNote type="component">vereiste</termNote>
-          </termSec>
-        </langSec>
-      </conceptEntry>
+    <conceptEntry id="249">
+     <descrip type="subjectField">insurance</descrip>
+     <xref>IATE_2246604</xref>
+     <ref>https://iate.europa.eu/entry/result/2246604/en</ref>
+     <langSec xml:lang="nl">
+      <termSec>
+       <term>solvabiliteitskapitaalvereiste</term>
+       <termNote type="partOfSpeech">noun</termNote>
+       <note>source: data/Solvency II Delegated Acts - NL.txt (#hits=331)</note>
+       <termNote type="termType">fullForm</termNote>
+       <descrip type="reliabilityCode">9</descrip>
+       <termNote type="lemma">solvabiliteits_kapitaalvereiste</termNote>
+       <termNote type="grammaticalNumber">singular</termNote>
+       <termNoteGrp>
+        <termNote type="component">solvabiliteits-</termNote>
+        <termNote type="component">kapitaal-</termNote>
+        <termNote type="component">vereiste</termNote>
+       </termNoteGrp>
+      </termSec>
+     </langSec>
+     <langSec xml:lang="en">
+      <termSec>
+       <term>SCR</term>
+       <termNote type="termType">abbreviation</termNote>
+       <descrip type="reliabilityCode">9</descrip>
+      </termSec>
+      <termSec>
+       <term>solvency capital requirement</term>
+       <termNote type="termType">fullForm</termNote>
+       <descrip type="reliabilityCode">9</descrip>
+       <termNote type="partOfSpeech">noun, noun, noun</termNote>
+       <note>source: data/Solvency II Delegated Acts - EN.txt (#hits=266)</note>
+      </termSec>
+     </langSec>
+     <langSec xml:lang="fr">
+      <termSec>
+       <term>capital de solvabilité requis</term>
+       <termNote type="termType">fullForm</termNote>
+       <descrip type="reliabilityCode">9</descrip>
+       <termNote type="partOfSpeech">noun, adp, noun, adj</termNote>
+       <note>source: ../nafigator-data/data/legislation/Solvency II Delegated Acts - FR.txt (#hits=198)</note>
+      </termSec>
+      <termSec>
+       <term>CSR</term>
+       <termNote type="termType">abbreviation</termNote>
+       <descrip type="reliabilityCode">9</descrip>
+      </termSec>
+     </langSec>
+    </conceptEntry>
 
 * a reference is included to concept '2246604' from the IATE dataset. From that reference, we can for example derive that the official European term for this concept in English is 'solvency capital requirement' and in German 'Solvenzkapitalanforderung' and that the term is defined in Directive 2009/138/EC (Solvency II).
 
