@@ -1,6 +1,6 @@
-==========
-terminator
-==========
+============
+determinator
+============
 
 
 .. image:: https://img.shields.io/badge/License-MIT-yellow.svg
@@ -19,10 +19,10 @@ Package for terminology management with the TermBase eXchange (TBX) format
 
 * Free software: MIT license
 
-to terminate [ **term**-i-nate ]
+to determinate [ **determ**-i-nate ]
 ------------------------------
 
-    *v.intr*, **terminated**, **terminating**
+    *v.intr*, **determinated**, **determinating**
 
     1. To extract terms from one of more text documents and output results in the TermBase eXchange (TBX) format.
 
@@ -31,7 +31,7 @@ Features
 
 - Extract expert terminology from documents in the NLP Annotation Format (NAF)
 
-- Generate and read TermBase eXchange (TBX) files according to ISO 30042:2019 (currently TBX-Core)
+- Generate and read TermBase eXchange (TBX) files according to ISO 30042:2019 (TBX-DNB dialect)
 
 - Add references and term notes from other sources (for example European IATE term bases)
 
@@ -43,8 +43,8 @@ We generate an empty TBX document with
 
 ::
 
-    t = terminator.TbxDocument()
-    t.generate(params = {"sourceDesc": "TBX file, created via dnb/terminator"})
+    t = determinator.TbxDocument()
+    t.generate(params = {"sourceDesc": "TBX file, created via dnb/determinator"})
 
 Then we extract terms from the Solvency II Delegated Acts (Dutch version) in NAF:
 
@@ -63,7 +63,7 @@ Then we add references from the InterActive Terminology for Europe (IATE) datase
 
     # read the IATE file
     IATE_FILE = "..//data//iate//IATE_export.tbx"
-    ref = terminator.TbxDocument().open(IATE_FILE)
+    ref = determinator.TbxDocument().open(IATE_FILE)
     t.copy_terms_from_tbx(terms=terms, reference=ref, prefix="IATE_")
 
 Then we add termnotes from the Dutch Lassy dataset (the small one) including basic insurance terms:
@@ -72,9 +72,11 @@ Then we add termnotes from the Dutch Lassy dataset (the small one) including bas
 
     # read the lassy file
     LASSY_FILE = "..//data//lassy//lassy_with_insurance.tbx"
-    lassy = terminator.TbxDocument().open(LASSY_FILE)
+    lassy = determinator.TbxDocument().open(LASSY_FILE)
     t.add_termnotes_from_tbx(reference=lassy, params = {'number_of_word_components': 4})
 
+
+Then we have a termbase with:
 
 ::
 
