@@ -55,7 +55,16 @@ Then we extract terms from the Solvency II Delegated Acts (Dutch version) in NAF
     for language in ['NL', 'EN', 'DE', 'FR', 'ES', 'ET', 'DA', 'SV']:
         DOC_FILE = "..\\..\\nafigator-data\\data\\legislation\\Solvency II Delegated Acts - "+language+".naf.xml"
         doc = nafigator.NafDocument().open(DOC_FILE)
-        merge_terms_dict(terms, nafigator.extract_terms(doc))
+        determinator.merge_terms_dict(terms, nafigator.extract_terms(doc))
+
+Then we create a termbase
+
+::
+
+    # Create an empty TermBase
+    t = determinator.TbxDocument()
+    t.generate(params = {"sourceDesc": "TBX file, created via dnb/determinator"})
+    t.create_tbx_from_terms_dict(terms=terms, params = {'concept_id_prefix': 'tbx_'})
 
 Then we add references from the InterActive Terminology for Europe (IATE) dataset:
 
@@ -64,7 +73,7 @@ Then we add references from the InterActive Terminology for Europe (IATE) datase
     # read the IATE file
     IATE_FILE = "..//data//iate//IATE_export.tbx"
     ref = determinator.TbxDocument().open(IATE_FILE)
-    t.copy_terms_from_tbx(terms=terms, reference=ref, prefix="IATE_")
+    t.copy_from_tbx(reference=ref)
 
 Then we add termnotes from the Dutch Lassy dataset (the small one) including basic insurance terms:
 
@@ -73,8 +82,7 @@ Then we add termnotes from the Dutch Lassy dataset (the small one) including bas
     # read the lassy file
     LASSY_FILE = "..//data//lassy//lassy_with_insurance.tbx"
     lassy = determinator.TbxDocument().open(LASSY_FILE)
-    t.add_termnotes_from_tbx(reference=lassy, params = {'number_of_word_components': 4})
-
+    t.add_termnotes_from_tbx(reference=lassy, params={'number_of_word_components':  5})
 
 Then we have a termbase with:
 
