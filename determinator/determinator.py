@@ -8,30 +8,17 @@ import logging
 from collections import defaultdict
 from copy import deepcopy
 
-NAMESPACES = {
-    None: "urn:iso:std:iso:30042:ed-2",
-}
-RELAXNG_TBX_BASIC = 'href="https://raw.githubusercontent.com/LTAC-Global/TBX-Basic_dialect/master/DCA/TBXcoreStructV03_TBX-Basic_integrated.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"'
-SCHEMA_TBX_BASIC = 'href="https://raw.githubusercontent.com/LTAC-Global/TBX-Basic_dialect/master/DCA/TBX-Basic_DCA.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"'
-
-XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
-
-TBXHEADER = "tbxHeader"
-FILEDESC = "fileDesc"
-SOURCEDESC = "sourceDesc"
-TEXT = "text"
-BODY = "body"
-TITLE = "title"
-
-
-def QName(prefix: str = None, name: str = None):
-    """ """
-    if prefix is None:
-        qname = etree.QName("{urn:iso:std:iso:30042:ed-2}" + name, name)
-    else:
-        qname = etree.QName("{" + namespaces[prefix] + "}" + name, name)
-    return qname
-
+from .const import NAMESPACES
+from .const import XML_LANG
+from .const import RELAXNG_TBX_BASIC
+from .const import SCHEMA_TBX_BASIC
+from .const import TBX_HEADER
+from .const import FILEDESC
+from .const import SOURCEDESC
+from .const import TEXT
+from .const import BODY
+from .const import TITLE
+from .const import QName
 
 class TbxDocument(etree._ElementTree):
     """The TbxDocument class"""
@@ -58,7 +45,7 @@ class TbxDocument(etree._ElementTree):
             input: the location of the TbxDocument to be opened
 
         Returns:
-            NafDocument: the TbxDocument that is opened
+            the TbxDocument that is opened
 
         """
         with open(input, "r", encoding="utf-8") as f:
@@ -67,7 +54,7 @@ class TbxDocument(etree._ElementTree):
 
     def setup_tbx(self, params: dict = {}):
         """ """
-        sub = etree.SubElement(self.getroot(), TBXHEADER)
+        sub = etree.SubElement(self.getroot(), TBX_HEADER)
         filedesc = etree.SubElement(sub, QName(name=FILEDESC))
 
         if TITLE in params.keys():
@@ -90,6 +77,23 @@ class TbxDocument(etree._ElementTree):
             if not any([element.tag == QName(name="langSec") for element in xml_concept]):
                 parent = xml_concept.getparent()
                 parent.remove(xml_concept)
+
+    @property
+    def header(self):
+        """Returns header of the TBX document as a dict"""
+        header = dict()
+        for child in self.find(TBX_HEADER, namespaces=NAMESPACES):
+            if child.tag == QName(name="fileDesc"):
+                header["fileDesc"] = {}
+                for child2 in child:
+                    if child2.tag == QName(name="sourceDesc"):
+                        header["fileDesc"]['sourceDesc'] = {}
+                        for child3 in child2:
+                            if child3.tag == QName(name="p"):
+                                header["fileDesc"]['sourceDesc']['p'] = child3.text
+            if child.tag == QName(name="public"):
+                header["public"] = dict(child.attrib)
+        return header
 
     @property
     def concepts_list(self):
@@ -219,6 +223,8 @@ class TbxDocument(etree._ElementTree):
     def create_tbx_from_terms_dict(self, terms: dict = {}, params: dict = {}):
         """ """
 
+        concept_id_prefix = params.get('concept_id_prefix', 'tbx_')
+
         def add_termNotes(term_section, term_notes):
 
             for freq_idx, uri in enumerate(term_notes["dc:uri"]):
@@ -239,7 +245,7 @@ class TbxDocument(etree._ElementTree):
         for term_text in terms.keys():
             language = terms[term_text]["dc:language"]
             concept = etree.SubElement(
-                body, QName(name="conceptEntry"), attrib={"id": "dnb:" + str(count)}
+                body, QName(name="conceptEntry"), attrib={"id": concept_id_prefix + str(count)}
             )
             count += 1
             descrip = etree.SubElement(
@@ -260,7 +266,7 @@ class TbxDocument(etree._ElementTree):
             )
             term_item.text = params.get("default_language-planningQualifier", "newTerm")
 
-    def copy_from_tbx(self, reference=None, prefix: str = "", params: dict = {}):
+    def copy_from_tbx(self, reference=None, params: dict = {}):
         """
         This function adds references to the current TbxDocument from another TbXDocument
         for example a IATE tbx-file if the term text of a concept coincides

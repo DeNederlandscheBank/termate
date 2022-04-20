@@ -20,7 +20,7 @@ Package for terminology management with the TermBase eXchange (TBX) format
 * Free software: MIT license
 
 to determinate [ **determ**-i-nate ]
-------------------------------
+------------------------------------
 
     *v.intr*, **determinated**, **determinating**
 
