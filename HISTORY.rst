@@ -6,3 +6,8 @@ History
 ------------------
 
 * First release on PyPI.
+
+0.1.1 (2022-05-22)
+------------------
+
+* SKOS added.

@@ -7,5 +7,7 @@ __version__ = "0.1.0"
 from .determinator import *
 from .importskos import *
 from .convert2skos import *
-from .const import *
+from .convert2rdf import *
 from .utils import *
+from .vocab import *
+from .types import *

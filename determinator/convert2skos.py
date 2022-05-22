@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""Convert2rdf module.
+"""Convert2skos module.
 
-This module contains RDF conversion functions for determinator package
+This module contains SKOS/RDF conversion functions for determinator package
 
 """
 
