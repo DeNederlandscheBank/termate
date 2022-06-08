@@ -164,9 +164,8 @@ class TbxDocument(etree._ElementTree):
     def add_conceptEntry(self, concept: dict = {}, params: dict = {}):
         """ """
         body = self.find(TEXT + "/" + BODY, namespaces=NAMESPACES)
-        concept_id = concept["id"]
-        concept_langSec = concept["langSec"]
 
+        concept_id = concept["id"]
         concept_entry = etree.SubElement(
             body, QName(name="conceptEntry"), attrib={"id": concept_id}
         )
@@ -175,23 +174,34 @@ class TbxDocument(etree._ElementTree):
             descrip = etree.SubElement(
                 concept_entry,
                 QName(name="descrip"),
-                attrib=concept_descrip,
+                attrib=concept_descrip.get('attr', None),
             )
+            descrip.text = concept_descrip.get('text', '')
+        concept_xref = concept.get("xref", None)
+        if concept_xref is not None:
+            xref = etree.SubElement(
+                concept_entry,
+                QName(name="xref"),
+                attrib=concept_xref.get('attr', None),
+            )
+            xref.text = concept_xref.get('text', '')
+        concept_langSec = concept["lang"]
         for lang in concept_langSec.keys():
             lang_sec = etree.SubElement(
                 concept_entry,
                 QName(name="langSec"),
                 attrib={XML_LANG: lang},
             )
-            items = concept_langSec[lang]
-            term_sec = etree.SubElement(lang_sec, QName(name="termSec"))
-            for item in items:
-                term = etree.SubElement(
-                    term_sec,
-                    QName(name=item.get("type")),
-                    attrib=item.get("attr", None),
-                )
-                term.text = item.get("text", None)
+            termsecs = concept_langSec[lang]
+            for termsec in termsecs:
+                term_sec = etree.SubElement(lang_sec, QName(name="termSec"))
+                for item in termsec:
+                    term = etree.SubElement(
+                        term_sec,
+                        QName(name=item.get("type")),
+                        attrib=item.get("attr", None),
+                    )
+                    term.text = item.get("text", None)
 
     def set_language(self, language: str):
         """Set language of the TbxDocument"""

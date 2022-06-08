@@ -47,7 +47,7 @@ def convert2rdf_cli(input: str, prefix: str, format: str) -> None:
     """
     doc = TbxDocument().open(input)
 
-    graph = parse2rdf(doc=doc, params={"handlerPrefix": prefix})
+    graph = parse2graph(doc=doc, params={"handlerPrefix": prefix})
 
     if graph is not None:
         output, _ = os.path.splitext(input)
@@ -308,17 +308,21 @@ def processConceptEntry(element: etree.Element, params: dict = {}) -> None:
     output = params["out"]
     prefix = params.get("handlerPrefix", "_")
     for concept in element[0]:
-        concept_id = prefix + ":" + concept.attrib.get("id", None)
+        if concept.attrib.get("id", None)[0:4]=="http":
+            concept_id = "<"+concept.attrib.get("id", None)+">"
+        else:
+            concept_id = prefix + ":" + concept.attrib.get("id", None)
         output.write(concept_id + " ")
-        output.write("a skos:Concept ;\n")
         for item in concept:
             if item.tag == QName(name="descrip"):
                 if item.attrib.get("type", None) == "subjectField":
                     output.write('    skos:inScheme "'+item.text +'" ;\n')
+                elif item.attrib.get("type", None) == "relatedConcept":
+                    output.write('    skos:related <'+item.text +'> ;\n')
                 elif item.attrib.get("type", None) == "subordinateConceptGeneric":
-                    output.write("    skos:narrower "+item.text +" ;\n")
+                    output.write("    skos:narrower <"+item.text +"> ;\n")
                 elif item.attrib.get("type", None) == "superordinateConceptGeneric":
-                    output.write("    skos:broader "+item.text +" ;\n")
+                    output.write("    skos:broader <"+item.text +"> ;\n")
             if item.tag == QName(name="langSec"):
                 language = item.attrib[XML_LANG]
                 for term_sec in item:
@@ -330,21 +334,18 @@ def processConceptEntry(element: etree.Element, params: dict = {}) -> None:
                         if element.tag == QName(name="termNote") and element.attrib.get("type", None)=="termFrequency":
                             term_frequency = element.text
                     for element in term_sec:
-                        if element.tag == QName(name="term"):
+                        if element.tag == QName(name="term") and element.text is not None:
                             if term_type == "fullForm":
-                                output.write('    skos:prefLabel "'+element.text+'"@'+language.lower())
+                                output.write('    skos:prefLabel """'+element.text+'"""@'+language.lower())
                             elif term_type == "abbreviation":
-                                output.write('    skos:literalForm "'+element.text+'"@'+language.lower())
+                                output.write('    skos:literalForm """'+element.text+'"""@'+language.lower())
                             else:
-                                output.write('    skos:literalForm "'+element.text+'"@'+language.lower())
+                                output.write('    skos:literalForm """'+element.text+'"""@'+language.lower())
                             output.write(' ;\n')
                         if element.tag == QName(name="termNote"):
                             output.write('    skos:note "['+element.attrib.get("type", "")+"]"+element.text+'"')
                             output.write(' ;\n')
-                    if term_sec == item[-1]:
-                        output.write(' .\n')
-                    else:
-                        output.write(' ;\n')
+        output.write("    a skos:Concept .\n")
         output.write("\n")
     return None
 
