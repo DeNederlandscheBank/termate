@@ -120,10 +120,16 @@ class TbxDocument(etree._ElementTree):
                             )
                         concept["lang"][lang].append(termsec)
                 else:
-                    concept[etree.QName(xml_lang_sec.tag).localname] = {
-                        "attr": xml_lang_sec.attrib,
-                        "text": xml_lang_sec.text,
-                    }
+                    if etree.QName(xml_lang_sec.tag).localname in concept.keys():
+                        concept[etree.QName(xml_lang_sec.tag).localname].append({
+                            "attr": xml_lang_sec.attrib,
+                            "text": xml_lang_sec.text,
+                        })
+                    else:
+                        concept[etree.QName(xml_lang_sec.tag).localname] = [{
+                            "attr": xml_lang_sec.attrib,
+                            "text": xml_lang_sec.text,
+                        }]
             concepts.append(concept)
         return concepts
 
@@ -171,12 +177,13 @@ class TbxDocument(etree._ElementTree):
         )
         concept_descrip = concept.get("descrip", None)
         if concept_descrip is not None:
-            descrip = etree.SubElement(
-                concept_entry,
-                QName(name="descrip"),
-                attrib=concept_descrip.get('attr', None),
-            )
-            descrip.text = concept_descrip.get('text', '')
+            for d in concept_descrip:
+                descrip = etree.SubElement(
+                    concept_entry,
+                    QName(name="descrip"),
+                    attrib=d.get('attr', None),
+                )
+                descrip.text = d.get('text', '')
         concept_xref = concept.get("xref", None)
         if concept_xref is not None:
             xref = etree.SubElement(
@@ -668,12 +675,16 @@ class TbxDocument(etree._ElementTree):
                 "lemma",
                 "normativeAuthorization",
                 "language-planningQualifier",
+                "relatedConcept",
+                "subordinateConceptGeneric"
             ],
         )
         row = 1
         for concept in self.findall("text/body/conceptEntry", namespaces=NAMESPACES):
 
             subjectField = ""
+            relatedConcept = list()
+            subordinateConceptGeneric = list()
             xref = ""
             ref = ""
 
@@ -686,6 +697,18 @@ class TbxDocument(etree._ElementTree):
                     and element.attrib.get("type", None) == "subjectField"
                 ):
                     subjectField = element.text
+
+                if (
+                    element.tag == QName(name="descrip")
+                    and element.attrib.get("type", None) == "relatedConcept"
+                ):
+                    relatedConcept.append(element.text.split("/")[-1])
+
+                if (
+                    element.tag == QName(name="descrip")
+                    and element.attrib.get("type", None) == "subordinateConceptGeneric"
+                ):
+                    subordinateConceptGeneric.append(element.text.split("/")[-1])
 
                 if (
                     element.tag == QName(name="xref")
@@ -757,6 +780,8 @@ class TbxDocument(etree._ElementTree):
                                 termdata.get("lemma", ""),
                                 termdata.get("authorization", ""),
                                 termdata.get("qualifier", ""),
+                                ", ".join(relatedConcept),
+                                ", ".join(subordinateConceptGeneric)
                             ],
                         )
                         row += 1

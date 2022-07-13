@@ -336,11 +336,11 @@ def processConceptEntry(element: etree.Element, params: dict = {}) -> None:
                     for element in term_sec:
                         if element.tag == QName(name="term") and element.text is not None:
                             if term_type == "fullForm":
-                                output.write('    skos:prefLabel """'+element.text+'"""@'+language.lower())
+                                output.write('    skos:prefLabel """'+element.text.replace("\\", "\\\\")+'"""@'+language.lower())
                             elif term_type == "abbreviation":
-                                output.write('    skos:literalForm """'+element.text+'"""@'+language.lower())
+                                output.write('    skos:literalForm """'+element.text.replace("\\", "\\\\")+'"""@'+language.lower())
                             else:
-                                output.write('    skos:literalForm """'+element.text+'"""@'+language.lower())
+                                output.write('    skos:literalForm """'+element.text.replace("\\", "\\\\")+'"""@'+language.lower())
                             output.write(' ;\n')
                         if element.tag == QName(name="termNote"):
                             output.write('    skos:note "['+element.attrib.get("type", "")+"]"+element.text+'"')
@@ -368,7 +368,7 @@ def genProvenanceName(params: dict) -> str:
     output.write("# provenance for data from same tbx-file\n")
     output.write(name + " \n")
     output.write(
-        '    xl:instance """' + params["provenance"] + '"""^^rdf:XMLLiteral .\n\n'
+        '    xl:instance """' + params["provenance"].replace("\\", "\\\\") + '"""^^rdf:XMLLiteral .\n\n'
     )
     return name
 
