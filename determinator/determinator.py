@@ -49,7 +49,8 @@ class TbxDocument(etree._ElementTree):
 
         """
         with open(input, "r", encoding="utf-8") as f:
-            self._setroot(etree.parse(f).getroot())
+            parser = etree.XMLParser(remove_blank_text=True)
+            self._setroot(etree.parse(f, parser).getroot())
         return self
 
     def setup_tbx(self, params: dict = {}):
