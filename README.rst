@@ -50,23 +50,10 @@ To get the concepts in the termbase as a list of dictionaries use:
 The results of the first concept in the list then look for example like this:
 
 :: 
+
     {
     'id': 'iate_127562',
-    'en': [
-    [
-    {'type': 'term', 
-     'attr': {}, 
-     'text': 'SA'
-    },
-    {'type': 'termNote', 
-     'attr': {'type': 'termType'}, 
-     'text': 'abbreviation'
-    },
-    {'type': 'descrip', 
-     'attr': {'type': 'reliabilityCode'}, 
-     'text': '1'}
-    ],
-    [
+    'en': [[
     {'type': 'term', 
      'attr': {}, 
      'text': 'services agreement'
