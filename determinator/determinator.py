@@ -10,15 +10,28 @@ from copy import deepcopy
 
 from .const import NAMESPACES
 from .const import XML_LANG
-from .const import RELAXNG_TBX_BASIC
-from .const import SCHEMA_TBX_BASIC
 from .const import TBX_HEADER
+from .const import TBX_RELAXNG
+from .const import TBX_SCHEMA
+from .const import TBX_DIALECT
+from .const import TBX_STYLE
 from .const import FILEDESC
 from .const import SOURCEDESC
+from .const import TITLESTMT
+from .const import TITLE
+from .const import PUBLICATIONSTMT
+from .const import PUBLICATION
+from .const import LANGSEC
 from .const import TEXT
 from .const import BODY
-from .const import TITLE
 from .const import QName
+
+# Default tbx rng and sch
+DEFAULT_TBX_RELAXNG = 'href="https://raw.githubusercontent.com/LTAC-Global/TBX-Basic_dialect/master/DCA/TBXcoreStructV03_TBX-Basic_integrated.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"'
+DEFAULT_TBX_SCHEMA = 'href="https://raw.githubusercontent.com/LTAC-Global/TBX-Basic_dialect/master/DCA/TBX-Basic_DCA.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"'
+DEFAULT_TBX_DIALECT = "TBX-Basic"
+DEFAULT_TBX_STYLE = "dca"
+
 
 class TbxDocument(etree._ElementTree):
     """The TbxDocument class"""
@@ -27,11 +40,20 @@ class TbxDocument(etree._ElementTree):
         """Initialize a TbxDocument with data from the params dict"""
         self._setroot(
             etree.Element(
-                "tbx", attrib={"type": "TBX-Basic", "style": "dca"}, nsmap=NAMESPACES
+                "tbx",
+                attrib={
+                    "type": params.get(TBX_DIALECT, DEFAULT_TBX_DIALECT),
+                    "style": params.get(TBX_STYLE, DEFAULT_TBX_STYLE),
+                },
+                nsmap=NAMESPACES,
             )
         )
-        pi1 = etree.ProcessingInstruction("xml-model", RELAXNG_TBX_BASIC)
-        pi2 = etree.ProcessingInstruction("xml-model", SCHEMA_TBX_BASIC)
+        pi1 = etree.ProcessingInstruction(
+            "xml-model", params.get(TBX_RELAXNG, DEFAULT_TBX_RELAXNG)
+        )
+        pi2 = etree.ProcessingInstruction(
+            "xml-model", params.get(TBX_SCHEMA, DEFAULT_TBX_SCHEMA)
+        )
         self.getroot().addprevious(pi1)
         self.getroot().addprevious(pi2)
         self.set_language("en")
@@ -56,12 +78,17 @@ class TbxDocument(etree._ElementTree):
     def setup_tbx(self, params: dict = {}):
         """ """
         sub = etree.SubElement(self.getroot(), TBX_HEADER)
-        filedesc = etree.SubElement(sub, QName(name=FILEDESC))
 
+        filedesc = etree.SubElement(sub, QName(name=FILEDESC))
         if TITLE in params.keys():
-            s = etree.SubElement(filedesc, QName(name="titleStmt"))
+            s = etree.SubElement(filedesc, QName(name=TITLESTMT))
             p = etree.SubElement(s, QName(name=TITLE))
             p.text = params.get(TITLE)
+
+        if PUBLICATION in params.keys():
+            s = etree.SubElement(filedesc, QName(name=PUBLICATIONSTMT))
+            p = etree.SubElement(s, QName(name="p"))
+            p.text = params.get(PUBLICATION)
 
         if SOURCEDESC in params.keys():
             s = etree.SubElement(filedesc, QName(name=SOURCEDESC))
@@ -75,7 +102,7 @@ class TbxDocument(etree._ElementTree):
         for xml_concept in self.findall(
             "text/body/conceptEntry", namespaces=NAMESPACES
         ):
-            if not any([element.tag == QName(name="langSec") for element in xml_concept]):
+            if not any([element.tag == QName(name=LANGSEC) for element in xml_concept]):
                 parent = xml_concept.getparent()
                 parent.remove(xml_concept)
 
@@ -84,16 +111,14 @@ class TbxDocument(etree._ElementTree):
         """Returns header of the TBX document as a dict"""
         header = dict()
         for child in self.find(TBX_HEADER, namespaces=NAMESPACES):
-            if child.tag == QName(name="fileDesc"):
-                header["fileDesc"] = {}
+            if child.tag == QName(name=FILEDESC):
+                header[FILEDESC] = {}
                 for child2 in child:
-                    if child2.tag == QName(name="sourceDesc"):
-                        header["fileDesc"]['sourceDesc'] = {}
+                    if child2.tag == QName(name=SOURCEDESC):
+                        header[FILEDESC][SOURCEDESC] = {}
                         for child3 in child2:
                             if child3.tag == QName(name="p"):
-                                header["fileDesc"]['sourceDesc']['p'] = child3.text
-            if child.tag == QName(name="public"):
-                header["public"] = dict(child.attrib)
+                                header[FILEDESC][SOURCEDESC]["p"] = child3.text
         return header
 
     @property
@@ -106,7 +131,7 @@ class TbxDocument(etree._ElementTree):
             concept["id"] = xml_concept.attrib["id"]
             concept["lang"] = {}
             for xml_lang_sec in xml_concept:
-                if xml_lang_sec.tag == QName(name="langSec"):
+                if xml_lang_sec.tag == QName(name=LANGSEC):
                     lang = xml_lang_sec.attrib[XML_LANG]
                     concept["lang"][lang] = list()
                     for xml_term_sec in xml_lang_sec:
@@ -122,15 +147,19 @@ class TbxDocument(etree._ElementTree):
                         concept["lang"][lang].append(termsec)
                 else:
                     if etree.QName(xml_lang_sec.tag).localname in concept.keys():
-                        concept[etree.QName(xml_lang_sec.tag).localname].append({
-                            "attr": xml_lang_sec.attrib,
-                            "text": xml_lang_sec.text,
-                        })
+                        concept[etree.QName(xml_lang_sec.tag).localname].append(
+                            {
+                                "attr": xml_lang_sec.attrib,
+                                "text": xml_lang_sec.text,
+                            }
+                        )
                     else:
-                        concept[etree.QName(xml_lang_sec.tag).localname] = [{
-                            "attr": xml_lang_sec.attrib,
-                            "text": xml_lang_sec.text,
-                        }]
+                        concept[etree.QName(xml_lang_sec.tag).localname] = [
+                            {
+                                "attr": xml_lang_sec.attrib,
+                                "text": xml_lang_sec.text,
+                            }
+                        ]
             concepts.append(concept)
         return concepts
 
@@ -182,22 +211,32 @@ class TbxDocument(etree._ElementTree):
                 descrip = etree.SubElement(
                     concept_entry,
                     QName(name="descrip"),
-                    attrib=d.get('attr', None),
+                    attrib=d.get("attr", None),
                 )
-                descrip.text = d.get('text', '')
+                descrip.text = d.get("text", "")
         concept_xref = concept.get("xref", None)
         if concept_xref is not None:
-            xref = etree.SubElement(
-                concept_entry,
-                QName(name="xref"),
-                attrib=concept_xref.get('attr', None),
-            )
-            xref.text = concept_xref.get('text', '')
+            for d in concept_xref:
+                xref = etree.SubElement(
+                    concept_entry,
+                    QName(name="xref"),
+                    attrib=d.get("attr", None),
+                )
+                xref.text = d.get("text", "")
+        concept_ref = concept.get("ref", None)
+        if concept_ref is not None:
+            for d in concept_ref:
+                ref = etree.SubElement(
+                    concept_entry,
+                    QName(name="ref"),
+                    attrib=d.get("attr", None),
+                )
+                ref.text = d.get("text", "")
         concept_langSec = concept["lang"]
         for lang in concept_langSec.keys():
             lang_sec = etree.SubElement(
                 concept_entry,
-                QName(name="langSec"),
+                QName(name=LANGSEC),
                 attrib={XML_LANG: lang},
             )
             termsecs = concept_langSec[lang]
@@ -224,6 +263,8 @@ class TbxDocument(etree._ElementTree):
                 if not success:
                     print(relaxng.error_log)
                 return success
+        # else:
+        # use rng from tbx-file itself
         return None
 
     def write(self, output: str):
@@ -241,7 +282,7 @@ class TbxDocument(etree._ElementTree):
     def create_tbx_from_terms_dict(self, terms: dict = {}, params: dict = {}):
         """ """
 
-        concept_id_prefix = params.get('concept_id_prefix', 'tbx_')
+        concept_id_prefix = params.get("concept_id_prefix", "tbx_")
 
         def add_termNotes(term_section, term_notes):
 
@@ -263,7 +304,9 @@ class TbxDocument(etree._ElementTree):
         for term_text in terms.keys():
             language = terms[term_text]["dc:language"]
             concept = etree.SubElement(
-                body, QName(name="conceptEntry"), attrib={"id": concept_id_prefix + str(count)}
+                body,
+                QName(name="conceptEntry"),
+                attrib={"id": concept_id_prefix + str(count)},
             )
             count += 1
             descrip = etree.SubElement(
@@ -271,7 +314,7 @@ class TbxDocument(etree._ElementTree):
             )
             descrip.text = params.get("default_domain", "Domain code not specified")
             lang_section = etree.SubElement(
-                concept, QName(name="langSec"), {XML_LANG: language}
+                concept, QName(name=LANGSEC), {XML_LANG: language}
             )
             term_section = etree.SubElement(lang_section, QName(name="termSec"))
             term_item = etree.SubElement(term_section, QName(name="term"))
@@ -308,7 +351,7 @@ class TbxDocument(etree._ElementTree):
         for concept in body:
             concept_id = concept.attrib["id"]
             for element in concept:
-                if element.tag == QName(name="langSec"):
+                if element.tag == QName(name=LANGSEC):
                     language = element.attrib.get(XML_LANG, "")
                     for termSec in element:
                         for item in termSec:
@@ -340,7 +383,7 @@ class TbxDocument(etree._ElementTree):
         for concept in body:
             concept_id = concept.attrib["id"]
             for langSec in concept:
-                if langSec.tag == QName(name="langSec"):
+                if langSec.tag == QName(name=LANGSEC):
                     for termSec in langSec:
                         for item in termSec:
                             if item.tag == QName(name="xref"):
@@ -368,7 +411,8 @@ class TbxDocument(etree._ElementTree):
                     attrib={
                         "type": "externalCrossReference",
                         "target": "https://iate.europa.eu/entry/result/"
-                        + str(key) + "/en",
+                        + str(key)
+                        + "/en",
                     },
                 )
                 note.text = key
@@ -381,7 +425,7 @@ class TbxDocument(etree._ElementTree):
 
                 langSecs = {
                     lang: etree.SubElement(
-                        concept, QName(name="langSec"), {XML_LANG: lang}
+                        concept, QName(name=LANGSEC), {XML_LANG: lang}
                     )
                     for lang in unique_languages
                 }
@@ -575,7 +619,7 @@ class TbxDocument(etree._ElementTree):
         for concept in self.findall("text/body/conceptEntry", namespaces=NAMESPACES):
             concept_id = concept.attrib["id"]
             for item in concept:
-                if item.tag == QName(name="langSec"):
+                if item.tag == QName(name=LANGSEC):
                     if item.attrib.get(XML_LANG, "") == "nl":
                         for termSec in item:  # termsec
                             term_pos = None
@@ -677,7 +721,7 @@ class TbxDocument(etree._ElementTree):
                 "normativeAuthorization",
                 "language-planningQualifier",
                 "relatedConcept",
-                "subordinateConceptGeneric"
+                "subordinateConceptGeneric",
             ],
         )
         row = 1
@@ -723,7 +767,7 @@ class TbxDocument(etree._ElementTree):
                 ):
                     ref = element.text
 
-                if element.tag == QName(name="langSec") and (
+                if element.tag == QName(name=LANGSEC) and (
                     languages == [] or element.attrib.get(XML_LANG) in languages
                 ):
 
@@ -782,7 +826,7 @@ class TbxDocument(etree._ElementTree):
                                 termdata.get("authorization", ""),
                                 termdata.get("qualifier", ""),
                                 ", ".join(relatedConcept),
-                                ", ".join(subordinateConceptGeneric)
+                                ", ".join(subordinateConceptGeneric),
                             ],
                         )
                         row += 1

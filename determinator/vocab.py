@@ -1,7 +1,4 @@
-
-
-class DC():
-
+class DC:
     def __init__(self):
 
         self.rights = "http://purl.org/dc/terms/rights"
@@ -9,26 +6,26 @@ class DC():
         self.attribution = "http://creativecommons.org/ns#attributionName"
         self.language = "http://purl.org/dc/terms/language"
 
-class IATE():
 
+class IATE:
     def __init__(self):
 
         self.rights = "http://iate.europa.eu/copyright.html"
         self.iate = "http://iate.europa.eu/"
         self.Lexicon = "http://tbx2rdf.lider-project.eu/data/iate#subjectField"
 
-class LIME():
 
+class LIME:
     def __init__(self):
 
         self.Lexicon = "http://www.w3.org/ns/lemon/lime#Lexicon"
         self.entry = "http://www.w3.org/ns/lemon/lime#entry"
         self.language = "http://www.w3.org/ns/lemon/lime#language"
-    
-class ONTOLEX():
 
+
+class ONTOLEX:
     def __init__(self):
-        
+
         self.lexicalizedSense = "http://www.w3.org/ns/lemon/ontolex#lexicalizedSense"
         self.writtenRep = "http://www.w3.org/ns/lemon/ontolex#writtenRep"
         self.sense = "http://www.w3.org/ns/lemon/ontolex#sense"
@@ -40,26 +37,28 @@ class ONTOLEX():
         self.LexicalEntry = "http://www.w3.org/ns/lemon/ontolex#LexicalEntry"
         self.SenseEntry = "http://www.w3.org/ns/lemon/ontolex#LexicalSense"
         self.Concept = "http://www.w3.org/ns/lemon/ontolex#LexicalConcept"
-        self.isLexicalizedSenseOf = "http://www.w3.org/ns/lemon/ontolex#isLexicalizedSenseOf"
-    
-class PROVO():
+        self.isLexicalizedSenseOf = (
+            "http://www.w3.org/ns/lemon/ontolex#isLexicalizedSenseOf"
+        )
 
+
+class PROVO:
     def __init__(self):
-    
+
         self.Activity = "http://www.w3.org/ns/prov#Activity"
         self.Agent = "http://www.w3.org/ns/prov#Agent"
         self.wasGeneratedBy = "http://www.w3.org/ns/prov#wasGeneratedBy"
         self.endedAtTime = "http://www.w3.org/ns/prov#endedAtTime"
         self.wasAssociatedWith = "http://www.w3.org/ns/prov#wasAssociatedWith"
 
-class SKOS():
-    
-    def __init__(self):
-    
-        self.Concept = "http://www.w3.org/2004/02/skos/core#Concept"
-     
-class TBX():
 
+class SKOS:
+    def __init__(self):
+
+        self.Concept = "http://www.w3.org/2004/02/skos/core#Concept"
+
+
+class TBX:
     def __init__(self):
 
         self.SkosConcept = "http://www.w3.org/2004/02/skos/core#Concept"
@@ -95,7 +94,7 @@ class TBX():
         self.partOfSpeech = "http://tbx2rdf.lider-project.eu/tbx#partOfSpeech"
         self.grammaticalNumber = "http://tbx2rdf.lider-project.eu/tbx#grammaticalNumber"
         self.transactionType = "http://tbx2rdf.lider-project.eu/tbx#transactionType"
-         
+
         self.reliabilityCode1 = "http://tbx2rdf.lider-project.eu/tbx#reliabilityCode1"
         self.reliabilityCode2 = "http://tbx2rdf.lider-project.eu/tbx#reliabilityCode2"
         self.reliabilityCode3 = "http://tbx2rdf.lider-project.eu/tbx#reliabilityCode3"
@@ -114,7 +113,7 @@ class TBX():
         self.other = "http://tbx2rdf.lider-project.eu/tbx#other"
         self.singular = "http://tbx2rdf.lider-project.eu/tbx#singular"
         self.plural = "http://tbx2rdf.lider-project.eu/tbx#plural"
-         
+
         # Adds the most common prefixes to the generated model
         # def addPrefixesToModel(self):
 
@@ -131,4 +130,3 @@ class TBX():
         #     model.setNsPrefix("dcat", "http://www.w3.org/ns/dcat#")
         #     model.setNsPrefix("prov", "http://www.w3.org/ns/prov#")
         #     model.setNsPrefix("decomp", "http://www.w3.org/ns/lemon/decomp#")
-        

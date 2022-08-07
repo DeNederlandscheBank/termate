@@ -2,8 +2,8 @@ import uuid
 import regex
 from lxml import etree
 
-class IndividualMapping():
 
+class IndividualMapping:
     def __init__(self):
         self.url = None
 
@@ -16,15 +16,14 @@ class IndividualMapping():
     def toString(self):
         return url.format("Individual <%s>")
 
-class Mappings():
 
+class Mappings:
     def __init__(self):
-        """
-        """
+        """ """
         self.mappings = None
-        self.individualMappings = None;
+        self.individualMappings = None
         self.defaultLanguage = "en"
-    
+
     def readInMappings(self, mapping_file):
         """
         Creates a Mappings object from a reader
@@ -32,20 +31,33 @@ class Mappings():
         self.mappings = dict()
 
         mapping1 = regex.compile("^(\\S*?)\\s+<(\\S*?)>$")
-        mapping2 = regex.compile("^(\\S*?)\\s+(\\S*?)\\s+(\\S*?)\\s+<(\\S*)>\\s+OP(\\s*\\{(.*?)\\})?$")
-        mapping3 = regex.compile("^(\\S*?)\\s+(\\S*?)\\s+(\\S*?)\\s+<(\\S*)>\\s+DP(\\s*<(.*?)>)?$")
-        mapping4 = regex.compile("^(\\S*?)\\s+(\\S*?)\\s+(\\S*?)\\s+<(\\S*)>\\s+EX(\\s*\\{(.*?)\\})?$")
+        mapping2 = regex.compile(
+            "^(\\S*?)\\s+(\\S*?)\\s+(\\S*?)\\s+<(\\S*)>\\s+OP(\\s*\\{(.*?)\\})?$"
+        )
+        mapping3 = regex.compile(
+            "^(\\S*?)\\s+(\\S*?)\\s+(\\S*?)\\s+<(\\S*)>\\s+DP(\\s*<(.*?)>)?$"
+        )
+        mapping4 = regex.compile(
+            "^(\\S*?)\\s+(\\S*?)\\s+(\\S*?)\\s+<(\\S*)>\\s+EX(\\s*\\{(.*?)\\})?$"
+        )
 
-        fstream = open(mapping_file, 'r')
+        fstream = open(mapping_file, "r")
         for line in fstream.readlines():
             strLine = line.strip()
             matcher = re.fullmatch(mapping1, strLine)
             if matcher is not None:
-                mappings.addMapping(matcher.group(1), IndividualMapping(matcher.group(2)))
+                mappings.addMapping(
+                    matcher.group(1), IndividualMapping(matcher.group(2))
+                )
             else:
                 matcher = re.fullmatch(mapping3, strLine)
                 if matcher is not None:
-                    mappings.addMapping(matcher.group(1), matcher.group(2), matcher.group(3), DatatypePropertyMapping(matcher.group(4), matcher.group(6)))
+                    mappings.addMapping(
+                        matcher.group(1),
+                        matcher.group(2),
+                        matcher.group(3),
+                        DatatypePropertyMapping(matcher.group(4), matcher.group(6)),
+                    )
                 else:
                     matcher = re.fullmatch(mapping2, strLine)
                     if matcher is not None:
@@ -54,34 +66,53 @@ class Mappings():
                             values = matcher.group(6).split(",")
                             for i in range(len(values)):
                                 new_set.add(values[i])
-                            objectPropertyMapping = ObjectPropertyMapping(matcher.group(4), new_set, mappings.individualMappings)
-                            mappings.addMapping(matcher.group(1), matcher.group(2), matcher.group(3), objectPropertyMapping)
+                            objectPropertyMapping = ObjectPropertyMapping(
+                                matcher.group(4), new_set, mappings.individualMappings
+                            )
+                            mappings.addMapping(
+                                matcher.group(1),
+                                matcher.group(2),
+                                matcher.group(3),
+                                objectPropertyMapping,
+                            )
                         else:
-                            objectPropertyMapping = ObjectPropertyMapping(matcher.group(4), mappings.individualMappings)
-                            mappings.addMapping(matcher.group(1), matcher.group(2), matcher.group(3), objectPropertyMapping)
+                            objectPropertyMapping = ObjectPropertyMapping(
+                                matcher.group(4), mappings.individualMappings
+                            )
+                            mappings.addMapping(
+                                matcher.group(1),
+                                matcher.group(2),
+                                matcher.group(3),
+                                objectPropertyMapping,
+                            )
                     else:
                         matcher = re.fullmatch(mapping4, strLine)
                         if matcher is not None:
                             em = ExceptionMapping(matcher.group(4), "")
-                            mappings.addMapping(matcher.group(1), matcher.group(2), matcher.group(3), em)
+                            mappings.addMapping(
+                                matcher.group(1), matcher.group(2), matcher.group(3), em
+                            )
                         else:
-                            logging.error("Bad line in mapping file: " + strLine);
+                            logging.error("Bad line in mapping file: " + strLine)
 
         return mappings
 
-
     def addMapping(self, name: str = "", target: IndividualMapping = None):
-        """
-        """
+        """ """
         individualMappings[name] = target
 
-    def addMapping(self, element: str = "", attribute: str = "", value: str = "", mapping: str = None):
-        """
-        """
+    def addMapping(
+        self,
+        element: str = "",
+        attribute: str = "",
+        value: str = "",
+        mapping: str = None,
+    ):
+        """ """
         # HashMap<String, HashMap<String, Mapping>> element2attr;
         # HashMap<String, Mapping> attr2mappings;
         if element in mappings.keys():
-            element2attr = mappings.get(element);
+            element2attr = mappings.get(element)
         else:
             element2attr = dict()
             mappings[element] = element2attr
@@ -112,16 +143,18 @@ class Mappings():
         else:
             return None
 
-class Mapping():
+
+class Mapping:
     def __init__(self):
         return None
 
-class Resource():
+
+class Resource:
     def __init__(self):
         return None
 
-class impID():
 
+class impID:
     def __init__(self):
         self.id = None
 
@@ -130,7 +163,7 @@ class impID():
         Set the ID of the object
         @param id
         """
-        self.id = str_id;
+        self.id = str_id
 
     def getID(self):
         """
@@ -140,7 +173,7 @@ class impID():
         if self.id is not None:
             return self.id
         else:
-            return type(self)+"-"+str(uuid.uuid4())
+            return type(self) + "-" + str(uuid.uuid4())
 
     def getRes(self):
         """
@@ -165,7 +198,7 @@ class impID():
             nl = node.getChildNodes()
             for i in range(len(nl)):
                 n = nl.item(i)
-                if (n.instanceof(etree.Element)):
+                if n.instanceof(etree.Element):
                     removeWhitespaceNode(n)
                 elif n.getTextContent().matches("\\s+"):
                     n.setTextContent("")
@@ -198,8 +231,10 @@ class impID():
         stringIO = StringIO()
         for element in node:
             removeWhitespaceNode(element)
-            if element.isinstance(etree.Element) or element.getTextContent().matches("\\s*"):
-                stringIO.append(nodeToString(n));
+            if element.isinstance(etree.Element) or element.getTextContent().matches(
+                "\\s*"
+            ):
+                stringIO.append(nodeToString(n))
         return stringIO
 
     def toRDF(self, parent: Resource = None):
@@ -209,20 +244,20 @@ class impID():
         should be added to this resource
         """
 
-class impIDLang(impID):
 
+class impIDLang(impID):
     def __init__(self, lang: str = "", mappings: Mappings = None):
         if lang is None or lang == "":
-            if (mappings is not None and mappings.defaultLanguage is not None):
+            if mappings is not None and mappings.defaultLanguage is not None:
                 self.lang = mappings.defaultLanguage
             else:
                 self.lang = "en"
         else:
-            self.lang = lang;
+            self.lang = lang
         super().__init__()
 
+
 class NoteLinkInfo(impIDLang):
-    
     def __init__(self, language: str = "", mappings: Mapping = None):
         super().__init__(language, mappings)
         self.References = list()
@@ -241,13 +276,14 @@ class NoteLinkInfo(impIDLang):
         for xReference in self.Xreferences:
             xReference.toRDF(parent)
         for transac in self.Transactions:
-            transac.toRDF(parent);
+            transac.toRDF(parent)
+
 
 class Describable(NoteLinkInfo):
 
     # This interface corresponds to an XML Element in the tbx spec that can have auxInfo
     # where auxInfo is defined as follows
-    
+
     # <!ENTITY % auxInfo '(descrip | descripGrp | admin | adminGrp | transacGrp | note | ref
     # | xref)*' >
 
@@ -259,6 +295,7 @@ class Describable(NoteLinkInfo):
         super().toRDF(parent)
         for descrip in self.Descriptions:
             descrip.toRDF(parent)
+
 
 class Term(Describable):
 
@@ -274,7 +311,6 @@ class Term(Describable):
 
 
 class NoteLinkInfo(impIDLang):
-
     def __init__(self):
         self.References = list()
         self.AdminInfos = list()
@@ -287,7 +323,7 @@ class NoteLinkInfo(impIDLang):
         super(language, mappings)
 
     def toRDF(self, parent: Resource = None):
-        
+
         for ref in References:
             ref.toRDF(parent)
         for adminInfo in AdminInfos:
@@ -298,11 +334,12 @@ class NoteLinkInfo(impIDLang):
             xReference.toRDF(parent)
         for transac in Transactions:
             transac.toRDF(parent)
-    
+
 
 class LexicalEntry(Describable):
-
-    def __init__(self, lemma: str = None, language: str = "", mappings: Mappings = None):
+    def __init__(
+        self, lemma: str = None, language: str = "", mappings: Mappings = None
+    ):
 
         # static LexicalEntry createFromSPARQL(String uri, Model model) {
         #     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -318,26 +355,26 @@ class LexicalEntry(Describable):
         if self.id is not None:
             return self.id
         else:
-            return self.Lemma+"-"+self.lang
+            return self.Lemma + "-" + self.lang
 
     def toRDF(self, parent: Resource = None):
-        
+
         term = self.getRes()
-        
+
         super().toRDF(term)
-    
+
         term.addProperty(RDF.type, ONTOLEX.LexicalEntry)
 
         # rlan = LexvoManager.mgr.getLexvoFromISO2(lang)
         # term.addProperty(DC.language, rlan) # before it was the mere constant "language"
         # term.addProperty(LIME.language, lang) # before it was the mere constant "language"
-        
+
         # sense = getSubRes("Sense")
 
         # sense.addProperty(ONTOLEX.isLexicalizedSenseOf, parent)
-        
+
         # term.addProperty(ONTOLEX.sense, sense)
-        
+
         # sense.addProperty(RDF.type, ONTOLEX.SenseEntry)
 
         # canonicalForm = getSubRes(model, "CanonicalForm")
@@ -345,7 +382,7 @@ class LexicalEntry(Describable):
         # term.addProperty(ONTOLEX.canonicalForm, canonicalForm)
 
         # canonicalForm.addProperty(ONTOLEX.writtenRep, Lemma, lang)
-        
+
         # for decomposition in Decomposition:
         #     decomposition.toRDF(model, term)
         # for note in TermNotes:

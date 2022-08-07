@@ -40,7 +40,8 @@ from lxml import etree
 # from .const.types import TransacNote
 # from .const.types import Transaction
 
-class TBX2RDF_Converter():
+
+class TBX2RDF_Converter:
 
     # Converts a TBX string into a RDF. Parses the XML searching for termEntry
     # elements.
@@ -53,33 +54,35 @@ class TBX2RDF_Converter():
         """
         result = convert(s, mappings)
         stringIO = StringIO()
-        RDFDataMgr.write(stringIO, result.getModel(resourceURI), RDFFormat.TURTLE_PRETTY)
+        RDFDataMgr.write(
+            stringIO, result.getModel(resourceURI), RDFFormat.TURTLE_PRETTY
+        )
         return stringIO.getvalue()
 
-#     public TBX_Terminology convert(Reader input, Mappings mappings) throws IOException, ParserConfigurationException, TBXFormatException, SAXException {
-#         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-#         DocumentBuilder db = dbf.newDocumentBuilder();
-#         TransacNote.mapAgents.clear();
-#         db.setEntityResolver(new EntityResolver() {
-#                 @Override
-#                 public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-#                     if (systemId.endsWith(".dtd")) {
-#                         return new InputSource(new StringReader(""));
-#                     } else {
-#                         return null;
-#                     }
-#                 }
-#             });
+    #     public TBX_Terminology convert(Reader input, Mappings mappings) throws IOException, ParserConfigurationException, TBXFormatException, SAXException {
+    #         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    #         DocumentBuilder db = dbf.newDocumentBuilder();
+    #         TransacNote.mapAgents.clear();
+    #         db.setEntityResolver(new EntityResolver() {
+    #                 @Override
+    #                 public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+    #                     if (systemId.endsWith(".dtd")) {
+    #                         return new InputSource(new StringReader(""));
+    #                     } else {
+    #                         return null;
+    #                     }
+    #                 }
+    #             });
 
-#         // parse the input document
-#         Document doc = db.parse(new InputSource(input));
+    #         // parse the input document
+    #         Document doc = db.parse(new InputSource(input));
 
-#         // extract here tbx metadata
-#         Element root = doc.getDocumentElement();
+    #         // extract here tbx metadata
+    #         Element root = doc.getDocumentElement();
 
-#         return createTerminology(root, mappings);
+    #         return createTerminology(root, mappings);
 
-#     }
+    #     }
 
     def createTerminology(self, root: etree.Element = None, mappings: Mappings = None):
         """
@@ -96,15 +99,16 @@ class TBX2RDF_Converter():
             elif element.tag != "tbx":
                 logging.error("Unknown root element found")
         return terminology
-        
-    
+
     def processTbxHeader(self, root: etree.Element = None, mappings: Mappings = None):
         """
         Given a XML root element, processes the tbx Header
         @param root XML root element
         @param mappings Mappings
         """
-        header = TbxHeader(processFileDescrip(XMLUtils.child(root, "fileDesc"), mappings))
+        header = TbxHeader(
+            processFileDescrip(XMLUtils.child(root, "fileDesc"), mappings)
+        )
         processID(header, root)
         for element in root:
             if element.tag == "encodingDesc":
@@ -125,7 +129,7 @@ class TBX2RDF_Converter():
             if element.tag == "titleStmt":
                 fileDesc.titleStmt = processTitleStmt(element, mappings)
             elif element.tag == "publicationStmt":
-                fileDesc.publicationStmt = element;
+                fileDesc.publicationStmt = element
             elif element.tag == "sourceDesc":
                 fileDesc.sourceDesc.append(element)
             else:
@@ -183,7 +187,7 @@ class TBX2RDF_Converter():
         """
         Processes, from a node, a termEntry
         @return A Term
-        # // create new Term 
+        # // create new Term
         # // add subjectField
         # // add ID
 
@@ -195,7 +199,7 @@ class TBX2RDF_Converter():
         term = Term()
         langsetcount = 0
         sid = node.getAttribute("id")
-        term.setID(sid);
+        term.setID(sid)
         for element in node:
             if element.tag == "langSet":
                 langsetcount += 1
@@ -206,36 +210,53 @@ class TBX2RDF_Converter():
             logger.warning("No langSet element in termEntry")
         return term
 
-    def processReference(self, descr: NoteLinkInfo = None, sub: etree.Element = None, mappings: Mappings = None):
+    def processReference(
+        self,
+        descr: NoteLinkInfo = None,
+        sub: etree.Element = None,
+        mappings: Mappings = None,
+    ):
         # // <!ELEMENT ref (#PCDATA) >
         # // <!ATTLIST ref
         # //    %impIDLangTypTgtDtyp;
         # // >
 
         # //<!ENTITY % impIDLangTypTgtDtyp ' id ID #IMPLIED
-        # //xml:lang CDATA #IMPLIED 
-        # // type CDATA #REQUIRED 
-        # // target IDREF #IMPLIED 
+        # //xml:lang CDATA #IMPLIED
+        # // type CDATA #REQUIRED
+        # // target IDREF #IMPLIED
         # // datatype CDATA #IMPLIED
         # //'>
-        ref = Reference(processType(sub, mappings, true), sub.getAttribute("xml:lang"), mappings, sub.getChildNodes());
+        ref = Reference(
+            processType(sub, mappings, true),
+            sub.getAttribute("xml:lang"),
+            mappings,
+            sub.getChildNodes(),
+        )
         ref.setID(sub.attrib.get("id", None))
         ref.target = sub.attrib.get("target", None)
         ref.datatype = sub.attrib.get("datatype", None)
         descr.References.append(ref)
 
-    def processAdminGrp(self, descr: NoteLinkInfo = None, node: etree.Element = None, mappings: Mappings = None):
+    def processAdminGrp(
+        self,
+        descr: NoteLinkInfo = None,
+        node: etree.Element = None,
+        mappings: Mappings = None,
+    ):
         """
-#         // <!ELEMENT adminGrp (admin, (adminNote|note|ref|xref)*) >
-#         // <!ATTLIST adminGrp
-#         // id ID #IMPLIED >
+        #         // <!ELEMENT adminGrp (admin, (adminNote|note|ref|xref)*) >
+        #         // <!ATTLIST adminGrp
+        #         // id ID #IMPLIED >
         """
         processID(descr, node)
         i = 0
         for element in node:
             name = element.text
             if i == 0 and not name == "admin":
-                logging.error("First element of TIG is not term !\n") # incorrect string
+                logging.error(
+                    "First element of TIG is not term !\n"
+                )  # incorrect string
             if name == "admin":
                 processAdmin(descr, element, mappings)
             elif name == "adminNote":
@@ -250,15 +271,20 @@ class TBX2RDF_Converter():
                 logging.error("Element " + name + "not defined by TBX standard")
             i += 1
 
-    def processLangSet(self, term: Term = None, langSet: etree.Element = None, mappings: Mappings = None):
+    def processLangSet(
+        self,
+        term: Term = None,
+        langSet: etree.Element = None,
+        mappings: Mappings = None,
+    ):
         """
         Processes the langset (xml:lang)
         @return a LexicalEntry
         """
-#         // <!ELEMENT langSet ((%auxInfo;), (tig | ntig)+) >
-#         // <!ATTLIST langSet
-#         // id ID #IMPLIED
-#         // xml:lang CDATA #REQUIRED >
+        #         // <!ELEMENT langSet ((%auxInfo;), (tig | ntig)+) >
+        #         // <!ATTLIST langSet
+        #         // id ID #IMPLIED
+        #         // xml:lang CDATA #REQUIRED >
 
         language = XMLUtils.getValueOfAttribute(langSet, "xml:lang")
         if language is None:
@@ -283,7 +309,12 @@ class TBX2RDF_Converter():
             logging.error("No TIG nor NTIG in langSet!")
         return term
 
-    def processTIG(self, entry: LexicalEntry = None, tig: etree.Element = None, mappings: Mappings = None):
+    def processTIG(
+        self,
+        entry: LexicalEntry = None,
+        tig: etree.Element = None,
+        mappings: Mappings = None,
+    ):
         """
         <!ELEMENT tig (term, (termNote)*, %auxInfo;) >
         <!ATTLIST tig
@@ -298,21 +329,34 @@ class TBX2RDF_Converter():
             if name == "term":
                 self.processTerm(entry, element, mappings)
             elif name == "termNote":
-                entry.TermNotes.add(TermNoteGrp(self.processTermNote(element, mappings), mappings.defaultLanguage, mappings))
+                entry.TermNotes.add(
+                    TermNoteGrp(
+                        self.processTermNote(element, mappings),
+                        mappings.defaultLanguage,
+                        mappings,
+                    )
+                )
             else:
                 processAuxInfo(entry, tig_child, mappings)
             i += 1
 
-    def processTerm(self, entry: LexicalEntry = None, node: etree.Element = None, mappings: Mappings = None):
-        """        
+    def processTerm(
+        self,
+        entry: LexicalEntry = None,
+        node: etree.Element = None,
+        mappings: Mappings = None,
+    ):
+        """
         Processes a term within a termEntry
         // <!ELEMENT term %basicText; >
         // <!ATTLIST term
         // id ID #IMPLIED >
-        """        
+        """
         entry.Lemma = node.getTextContent()
 
-    def processTermNote(self, tig_child: etree.Element = None, mappings: Mappings = None):
+    def processTermNote(
+        self, tig_child: etree.Element = None, mappings: Mappings = None
+    ):
         """
         <!ELEMENT termNote %noteText; >
         <!ATTLIST termNote
@@ -322,22 +366,32 @@ class TBX2RDF_Converter():
         xml:lang CDATA #IMPLIED type CDATA #REQUIRED target IDREF #IMPLIED datatype CDATA #IMPLIED
         '>
         """
-        note = TermNote(tig_child.getChildNodes(), processType(tig_child, mappings, true), tig_child.getAttribute("xml:lang"), mappings)
+        note = TermNote(
+            tig_child.getChildNodes(),
+            processType(tig_child, mappings, true),
+            tig_child.getAttribute("xml:lang"),
+            mappings,
+        )
         processImpIDLangTypeTgtDType(note, tig_child, mappings)
         return note
-    
-    def processNTIG(self, entry: LexicalEntry = None, ntig: etree.Element = None, mappings: Mappings = None):
+
+    def processNTIG(
+        self,
+        entry: LexicalEntry = None,
+        ntig: etree.Element = None,
+        mappings: Mappings = None,
+    ):
         """
         // <!ELEMENT ntig (termGrp, %auxInfo;) >
         // <!ATTLIST ntig
-        // id ID #IMPLIED	
+        // id ID #IMPLIED
         // >
         """
         i = 0
         for element in ntig:
             name = element.getNodeName()
             if i == 0 and not name == "termGrp":
-                if Main.lenient==false:
+                if Main.lenient == false:
                     logging.error("First element of NTIG is not termGrp !\n")
             if name == "termGrp":
                 self.processTermGroup(entry, ntig_child, mappings)
@@ -345,26 +399,34 @@ class TBX2RDF_Converter():
                 processAuxInfo(entry, ntig_child, mappings)
             i += 1
 
-    def processXReference(self, descr: NoteLinkInfo = None, node: etree.Element = None, mappings: Mappings = None):
+    def processXReference(
+        self,
+        descr: NoteLinkInfo = None,
+        node: etree.Element = None,
+        mappings: Mappings = None,
+    ):
         """
         // <!ELEMENT xref (#PCDATA) >
         // <!ATTLIST xref
         // %impIDType;
         // target CDATA #REQUIRED >
         """
-        xref = XReference(XMLUtils.getValueOfAttribute(node, "target"), node.getTextContent())
+        xref = XReference(
+            XMLUtils.getValueOfAttribute(node, "target"), node.getTextContent()
+        )
         processID(xref, node)
         xref.type = processType(node, mappings, false)
         descr.Xreferences.add(xref)
 
+
 #     def processDescripGroup(descr: Describable = None, node: etree.Element, mappings: Mappings = None):
-#         """     
+#         """
 #         // The DTD for a DescripGroup is as follows
 #         // <!ELEMENT descripGrp (descrip, (descripNote|admin|adminGrp|transacGrp|note|ref|xref)*)
 #         // >
 #         // <!ATTLIST descripGrp
 #         //  id ID #IMPLIED >
-#         """     
+#         """
 #         descrip = DescripGrp(processDescrip(XMLUtils.firstChild("descrip", node), mappings))
 #         processID(descrip, node);
 #         for element in node:
@@ -399,7 +461,7 @@ class TBX2RDF_Converter():
 #         admin = AdminInfo(node.getChildNodes(), processType(node, mappings, true), node.getAttribute("xml:lang"), mappings)
 #         processImpIDLangTypeTgtDType(admin, node, mappings)
 #         descr.AdminInfos.add(new AdminGrp(admin))
-    
+
 #     /**
 #      * Processes a Transaction Group www.isocat.org/datcat/DC-162 A transacGrp
 #      * element can contain either one transacNote element, or one date element,
@@ -501,7 +563,7 @@ class TBX2RDF_Converter():
 #         // <!ELEMENT descripNote (#PCDATA) >
 #         //<!ATTLIST descripNote
 #         //%impIDLangTypTgtDtyp;
-#         //> 
+#         //>
 #         final DescripNote descripNote = new DescripNote(sub.getChildNodes(), processType(sub, mappings, true), sub.getAttribute("xml:lang"), mappings);
 #         processImpIDLangTypeTgtDType(descripNote, sub, mappings);
 #         descrip.descripNote.add(descripNote);
@@ -522,7 +584,7 @@ class TBX2RDF_Converter():
 #         //<!ELEMENT transacNote (#PCDATA) >
 #         //<!ATTLIST transacNote
 #         //%impIDLangTypTgtDtyp;
-#         //> 
+#         //>
 #         final TransacNote transacNote = new TransacNote(child.getChildNodes(), processType(child, mappings, true), child.getAttribute("xml:lang"), mappings);
 #         processImpIDLangTypeTgtDType(transacNote, child, mappings);
 #         transacGrp.transacNotes.add(transacNote);
@@ -532,7 +594,7 @@ class TBX2RDF_Converter():
 #         //  <!ELEMENT date (#PCDATA) >
 #         //<!ATTLIST date
 #         //id ID #IMPLIED
-#         //> 
+#         //>
 #         transacGrp.date = child.getTextContent();
 #     }
 
@@ -540,7 +602,7 @@ class TBX2RDF_Converter():
 #         //  <!ELEMENT termNoteGrp (termNote, %noteLinkInfo;) >
 #         //<!ATTLIST termNoteGrp
 #         //id ID #IMPLIED
-#         //> 
+#         //>
 #         final TermNoteGrp termNoteGrp = new TermNoteGrp(processTermNote(XMLUtils.firstChild("termNote", elem), mappings), elem.getAttribute("xml:lang"), mappings);
 #         for (Element e : XMLUtils.children(elem)) {
 #             final String name = e.getTagName();
@@ -636,11 +698,8 @@ class TBX2RDF_Converter():
 #     }
 
 
-
-
-
 #     /**
-#      * 
+#      *
 #      */
 #     private void unexpected(Node n) {
 #         if (n instanceof Element) {
@@ -657,7 +716,7 @@ class TBX2RDF_Converter():
 #     }
 
 #     /**
-#      * 
+#      *
 #      */
 #     private void processImpIDLangTypeTgtDType(impIDLangTypeTgtDtyp ref, Element sub, Mappings mappings) {
 #         // <!ENTITY % impIDLangTypTgtDtyp '
@@ -710,7 +769,7 @@ class TBX2RDF_Converter():
 
 
 #     /**
-#      * 
+#      *
 #      */
 #     private Mapping processType(Element sub, Mappings mappings, boolean required) {
 #         if (sub.hasAttribute("type")) {
@@ -726,15 +785,15 @@ class TBX2RDF_Converter():
 #             return null;
 #         }
 #     }
-    
-    
+
+
 #     /**
 #      * Converts a XML TBX file (handling large files...)
 #      * It does not hold in memory the whole dataset, but parses it as it comes.
-#      * 
+#      *
 #      * A TBX file root element is called "tbx". It has two childre: marthifHeader and text
-#      * 
-#      * 
+#      *
+#      *
 #      * @param file Path to the input file
 #      * @param mappings Mappings
 #      * @return The TBX terminology
@@ -764,11 +823,11 @@ class TBX2RDF_Converter():
 
 #         //WE PROCESS HERE THE TBX HEADER
 #         TbxHeader tbxheader = extractAndReadTbxHeader(file, mappings);
-        
+
 
 #         if (tbxheader==null)
 #             return null;
-        
+
 #         //First we serialize the header
 #         Model mdataset = ModelFactory.createDefaultModel();
 #         //The whole dataset!
@@ -782,13 +841,12 @@ class TBX2RDF_Converter():
 #         tbxheader.toRDF(mdataset, rdataset);
 #         RDFDataMgr.write(fos, mdataset, Lang.NTRIPLES);
 
-        
+
 #         Model msubjectFields = SubjectFields.generateSubjectFields();
 #         RDFDataMgr.write(fos, msubjectFields, Lang.NTRIPLES);
-        
-        
 
-#         //We declare that every lexicon belongs to 
+
+#         //We declare that every lexicon belongs to
 #         Iterator it = lexicons.entrySet().iterator();
 #         Property prootresource=mdataset.createProperty("http://www.w3.org/TR/void/rootResource");
 #         while (it.hasNext()) {
@@ -796,8 +854,8 @@ class TBX2RDF_Converter():
 #             Resource rlexicon = (Resource) e.getValue();
 #             rlexicon.addProperty(prootresource, rdataset);
 #         }
-        
-        
+
+
 #         boolean dentro = false;
 #         try {
 #             inputStream = new FileInputStream(file);
@@ -856,7 +914,6 @@ class TBX2RDF_Converter():
 #             RDFDataMgr.write(fos, handler.getLexiconsModel(), Lang.NTRIPLES);
 
 
-
 #             // note that Scanner suppresses exceptions
 #             if (sc.ioException() != null) {
 #                 throw sc.ioException();
@@ -869,7 +926,7 @@ class TBX2RDF_Converter():
 #             }
 #         }
 #         return null;
-#     }        
+#     }
 #     /**
 #      * Gently loads a DOM XML document from a XML fragment.
 #      * If it fails, it returns null;
@@ -894,8 +951,8 @@ class TBX2RDF_Converter():
 #         } catch (Exception e) {
 #             return null;
 #         }
-#     }        
-    
+#     }
+
 
 #     /**
 #      * Parses the text manually, extracting as text the fragment where the TbxHeader is and then parses it as XML.
@@ -935,6 +992,6 @@ class TBX2RDF_Converter():
 #             logger.warn("Could not parse well the general metadata (MartifHeader)" + e.getMessage());
 #         }
 #         return martifheader;
-# }    
-    
+# }
+
 # }

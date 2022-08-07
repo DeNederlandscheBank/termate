@@ -11,3 +11,8 @@ History
 ------------------
 
 * SKOS added.
+
+0.1.3 (2022-08-07)
+------------------
+
+* Change to generate XBRL termbases

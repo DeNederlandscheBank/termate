@@ -102,7 +102,9 @@ def create_params(doc: TbxDocument, params: dict = {}):
     params["namespaces"] = dict()
     params["provenanceNumber"] = 0
     params["depNumber"] = 0
-    params["provenance"] = doc.header["fileDesc"]["sourceDesc"]['p'].replace("\\", "\\\\")
+    params["provenance"] = doc.header["fileDesc"]["sourceDesc"]["p"].replace(
+        "\\", "\\\\"
+    )
 
     addNamespace("dc", "http://purl.org/dc/elements/1.1/", params)
     addNamespace("xl", "http://www.xbrl.org/2003/XLink/", params)
@@ -295,6 +297,7 @@ def processHeader(element: etree.Element, params: dict = {}) -> None:
     output.write("\n")
     return None
 
+
 def processConceptEntry(element: etree.Element, params: dict = {}) -> None:
     """Function to convert conceptEntry entities layer to RDF
 
@@ -308,43 +311,73 @@ def processConceptEntry(element: etree.Element, params: dict = {}) -> None:
     output = params["out"]
     prefix = params.get("handlerPrefix", "_")
     for concept in element[0]:
-        if concept.attrib.get("id", None)[0:4]=="http":
-            concept_id = "<"+concept.attrib.get("id", None)+">"
+        if concept.attrib.get("id", None)[0:4] == "http":
+            concept_id = "<" + concept.attrib.get("id", None) + ">"
         else:
             concept_id = prefix + ":" + concept.attrib.get("id", None)
         output.write(concept_id + " ")
         for item in concept:
             if item.tag == QName(name="descrip"):
                 if item.attrib.get("type", None) == "subjectField":
-                    output.write('    skos:inScheme "'+item.text +'" ;\n')
+                    output.write('    skos:inScheme "' + item.text + '" ;\n')
                 elif item.attrib.get("type", None) == "relatedConcept":
-                    output.write('    skos:related <'+item.text +'> ;\n')
+                    output.write("    skos:related <" + item.text + "> ;\n")
                 elif item.attrib.get("type", None) == "subordinateConceptGeneric":
-                    output.write("    skos:narrower <"+item.text +"> ;\n")
+                    output.write("    skos:narrower <" + item.text + "> ;\n")
                 elif item.attrib.get("type", None) == "superordinateConceptGeneric":
-                    output.write("    skos:broader <"+item.text +"> ;\n")
+                    output.write("    skos:broader <" + item.text + "> ;\n")
             if item.tag == QName(name="langSec"):
                 language = item.attrib[XML_LANG]
                 for term_sec in item:
                     term_type = ""
                     term_frequency = ""
                     for element in term_sec:
-                        if element.tag == QName(name="termNote") and element.attrib.get("type", None)=="termType":
+                        if (
+                            element.tag == QName(name="termNote")
+                            and element.attrib.get("type", None) == "termType"
+                        ):
                             term_type = element.text
-                        if element.tag == QName(name="termNote") and element.attrib.get("type", None)=="termFrequency":
+                        if (
+                            element.tag == QName(name="termNote")
+                            and element.attrib.get("type", None) == "termFrequency"
+                        ):
                             term_frequency = element.text
                     for element in term_sec:
-                        if element.tag == QName(name="term") and element.text is not None:
+                        if (
+                            element.tag == QName(name="term")
+                            and element.text is not None
+                        ):
                             if term_type == "fullForm":
-                                output.write('    skos:prefLabel """'+element.text.replace("\\", "\\\\")+'"""@'+language.lower())
+                                output.write(
+                                    '    skos:prefLabel """'
+                                    + element.text.replace("\\", "\\\\")
+                                    + '"""@'
+                                    + language.lower()
+                                )
                             elif term_type == "abbreviation":
-                                output.write('    skos:literalForm """'+element.text.replace("\\", "\\\\")+'"""@'+language.lower())
+                                output.write(
+                                    '    skos:literalForm """'
+                                    + element.text.replace("\\", "\\\\")
+                                    + '"""@'
+                                    + language.lower()
+                                )
                             else:
-                                output.write('    skos:literalForm """'+element.text.replace("\\", "\\\\")+'"""@'+language.lower())
-                            output.write(' ;\n')
+                                output.write(
+                                    '    skos:literalForm """'
+                                    + element.text.replace("\\", "\\\\")
+                                    + '"""@'
+                                    + language.lower()
+                                )
+                            output.write(" ;\n")
                         if element.tag == QName(name="termNote"):
-                            output.write('    skos:note "['+element.attrib.get("type", "")+"]"+element.text+'"')
-                            output.write(' ;\n')
+                            output.write(
+                                '    skos:note "['
+                                + element.attrib.get("type", "")
+                                + "]"
+                                + element.text
+                                + '"'
+                            )
+                            output.write(" ;\n")
         output.write("    a skos:Concept .\n")
         output.write("\n")
     return None
@@ -368,7 +401,9 @@ def genProvenanceName(params: dict) -> str:
     output.write("# provenance for data from same tbx-file\n")
     output.write(name + " \n")
     output.write(
-        '    xl:instance """' + params["provenance"].replace("\\", "\\\\") + '"""^^rdf:XMLLiteral .\n\n'
+        '    xl:instance """'
+        + params["provenance"].replace("\\", "\\\\")
+        + '"""^^rdf:XMLLiteral .\n\n'
     )
     return name
 

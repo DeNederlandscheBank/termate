@@ -22,8 +22,6 @@ import rdflib
 
 from .const import NAMESPACES
 from .const import XML_LANG
-from .const import RELAXNG_TBX_BASIC
-from .const import SCHEMA_TBX_BASIC
 from .const import TBX_HEADER
 from .const import FILEDESC
 from .const import SOURCEDESC
@@ -33,27 +31,36 @@ from .const import TITLE
 from .const import QName
 from .determinator import TbxDocument
 
+
 def get_concepts(g: rdflib.Graph = None):
 
-	query = """
+    query = """
 	SELECT DISTINCT ?c
 	WHERE {
 	    ?c a <http://www.w3.org/2004/02/skos/core#Concept> .
 	}"""
-	return list(g.query(query))
+    return list(g.query(query))
+
 
 def retrieve_skos(g: rdflib.Graph = None, concept: str = "", item: str = ""):
 
-    query = """
+    query = (
+        """
         SELECT DISTINCT ?b
         WHERE {
-            """+concept+""" <http://www.w3.org/2004/02/skos/core#"""+item+"""> ?b .
+            """
+        + concept
+        + """ <http://www.w3.org/2004/02/skos/core#"""
+        + item
+        + """> ?b .
     }"""
+    )
     qres = list(g.query(query))
     if len(qres) > 0:
         return qres
     else:
         return None
+
 
 def create_tbx(t: TbxDocument = None, g: rdflib.Graph = None):
 
@@ -66,32 +73,50 @@ def create_tbx(t: TbxDocument = None, g: rdflib.Graph = None):
         body = t.find(TEXT + "/" + BODY, namespaces=NAMESPACES)
 
         concept_entry = etree.SubElement(
-            body, QName(name="conceptEntry"), attrib={"id": concept_id.replace("http://data.jrc.ec.europa.eu/ontology/cybersecurity/", "frc:")}
+            body,
+            QName(name="conceptEntry"),
+            attrib={
+                "id": concept_id.replace(
+                    "http://data.jrc.ec.europa.eu/ontology/cybersecurity/", "frc:"
+                )
+            },
         )
 
         inScheme = retrieve_skos(g, concept[0].n3(), "inScheme")
         if inScheme is not None:
             for item in inScheme:
                 element = etree.SubElement(
-                    concept_entry, QName(name="descrip"), attrib={"type": "subjectField"}
+                    concept_entry,
+                    QName(name="descrip"),
+                    attrib={"type": "subjectField"},
                 )
-                element.text = str(item[0]).replace("http://data.jrc.ec.europa.eu/ontology/cybersecurity/", "frc:")
+                element.text = str(item[0]).replace(
+                    "http://data.jrc.ec.europa.eu/ontology/cybersecurity/", "frc:"
+                )
 
         broader = retrieve_skos(g, concept[0].n3(), "broader")
         if broader is not None:
             for item in broader:
                 element = etree.SubElement(
-                    concept_entry, QName(name="descrip"), attrib={"type": "superordinateConceptGeneric"}
+                    concept_entry,
+                    QName(name="descrip"),
+                    attrib={"type": "superordinateConceptGeneric"},
                 )
-                element.text = str(item[0]).replace("http://data.jrc.ec.europa.eu/ontology/cybersecurity/", "frc:")
+                element.text = str(item[0]).replace(
+                    "http://data.jrc.ec.europa.eu/ontology/cybersecurity/", "frc:"
+                )
 
         narrower = retrieve_skos(g, concept[0].n3(), "narrower")
         if narrower is not None:
             for item in narrower:
                 element = etree.SubElement(
-                    concept_entry, QName(name="descrip"), attrib={"type": "subordinateConceptGeneric"}
+                    concept_entry,
+                    QName(name="descrip"),
+                    attrib={"type": "subordinateConceptGeneric"},
                 )
-                element.text = str(item[0]).replace("http://data.jrc.ec.europa.eu/ontology/cybersecurity/", "frc:")
+                element.text = str(item[0]).replace(
+                    "http://data.jrc.ec.europa.eu/ontology/cybersecurity/", "frc:"
+                )
 
         notation = retrieve_skos(g, concept[0].n3(), "notation")
 
@@ -144,5 +169,3 @@ def create_tbx(t: TbxDocument = None, g: rdflib.Graph = None):
                             term.text = "abbreviation"
                         else:
                             term.text = "variant"
-
-                

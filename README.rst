@@ -19,32 +19,82 @@ Package for terminology management with the TermBase eXchange (TBX) format
 
 * Free software: MIT license
 
-to determinate [ **determ**-i-nate ]
-------------------------------------
-
-    *v.intr*, **determinated**, **determinating**
-
-    1. To extract terms from one of more text documents and output results in the TermBase eXchange (TBX) format.
 
 Features
 --------
 
-- Extract expert terminology from documents in the NLP Annotation Format (NAF)
+- Use existing TBX termbases within NLP analyses (TBX version 3)
 
-- Generate and read TermBase eXchange (TBX) files according to ISO 30042:2019 (TBX-DNB dialect)
-
-- Add references and term notes from other sources (for example European IATE term bases)
+- Create TBX termbases based on extracted terms from documents
 
 
 Overview of the idea
 --------------------
 
+Read an existing termbase
+=========================
+
+If you already have a termbase available then you can read it in the following way:
+
+::
+
+    IATE_FILE = os.path.join("..", "data", "termbases", "IATE_export.tbx")
+    termbase = determinator.TbxDocument().open(IATE_FILE)
+
+To get the concepts in the termbase as a list of dictionaries use:
+
+::
+
+    concepts = termbase.concepts_list
+
+The results of the first concept in the list then look for example like this:
+
+:: 
+    {
+        'id': 'iate_127562',
+        'en': 
+        [
+            [
+                {'type': 'term', 
+                 'attr': {}, 
+                 'text': 'SA'},
+                {'type': 'termNote', 
+                 'attr': {'type': 'termType'}, 
+                 'text': 'abbreviation'
+                },
+                {'type': 'descrip', 
+                 'attr': {'type': 'reliabilityCode'}, 
+                 'text': '1'}
+            ],
+            [
+                {'type': 'term', 
+                 'attr': {}, 
+                 'text': 'services agreement'},
+                {'type': 'termNote', 
+                 'attr': {'type': 'termType'}, 
+                 'text': 'fullForm'},
+                {'type': 'descrip', 
+                 'attr': {'type': 'reliabilityCode'}, 
+                 'text': '1'}
+            ]
+        ]
+    ...
+
+Create a termbase from extracted terms
+======================================
+
 We generate an empty TBX document with
 
 ::
 
-    t = determinator.TbxDocument()
-    t.generate(params = {"sourceDesc": "TBX file, created via dnb/determinator"})
+    termbase = determinator.TbxDocument()
+    termbase.generate(params = {
+        determinator.TBX_DIALECT: "TBX-DNB",
+        determinator.TBX_STYLE: "dca",
+        determinator.TBX_RELAXNG: "https://github.com/DeNederlandscheBank/determinator/blob/main/data/dialects/TBX-DNB.rng",
+        determinator.SOURCEDESC: "TBX file, created via dnb/determinator"
+    })
+
 
 Then we extract terms from the Solvency II Delegated Acts (Dutch version) in NAF:
 
@@ -61,10 +111,9 @@ Then we create a termbase
 
 ::
 
-    # Create an empty TermBase
-    t = determinator.TbxDocument()
-    t.generate(params = {"sourceDesc": "TBX file, created via dnb/determinator"})
-    t.create_tbx_from_terms_dict(terms=terms, params = {'concept_id_prefix': 'tbx_'})
+    # add concepts from a dictionary of terms
+    termbase.create_tbx_from_terms_dict(terms=terms, 
+                                 params={'concept_id_prefix': 'tbx_'})
 
 Then we add references from the InterActive Terminology for Europe (IATE) dataset:
 
@@ -73,7 +122,7 @@ Then we add references from the InterActive Terminology for Europe (IATE) datase
     # read the IATE file
     IATE_FILE = "..//data//iate//IATE_export.tbx"
     ref = determinator.TbxDocument().open(IATE_FILE)
-    t.copy_from_tbx(reference=ref)
+    termbase.copy_from_tbx(reference=ref)
 
 Then we add termnotes from the Dutch Lassy dataset (the small one) including basic insurance terms:
 
@@ -82,7 +131,7 @@ Then we add termnotes from the Dutch Lassy dataset (the small one) including bas
     # read the lassy file
     LASSY_FILE = "..//data//lassy//lassy_with_insurance.tbx"
     lassy = determinator.TbxDocument().open(LASSY_FILE)
-    t.add_termnotes_from_tbx(reference=lassy, params={'number_of_word_components':  5})
+    termbase.add_termnotes_from_tbx(reference=lassy, params={'number_of_word_components':  5})
 
 Then we have a termbase with:
 
@@ -152,8 +201,20 @@ Datasets
 * `Lassy klein corpus <https://taalmaterialen.ivdnt.org/download/lassy-klein-corpus6/>`_
 
 
-The TermBase eXchange format
-----------------------------
+The TermBase eXchange format (version 3)
+----------------------------------------
+
+TBX, or TermBase eXchange, is an international standard for representing and exchanging information from termbases. TBX version 3 is published as ISO 30042:2019. A TBX Resource represents a collection of terminological concepts and is expressed as an XML file. It contains a header and a body of text with the terminological concepts. The main elements are described below.
+
+- Header (tbxHeader): represents the metadata of the TBX Resource and contains the file description (fileDesc). The file description (fileDesc) contains (optional) title statement (titleStmt), publication statement (publicationStmt) and source description (sourceDesc).
+
+- Terminological concept (conceptEntry): represents a language-independent concept. Each terminological concept has a unique IS, is described by a set of properties, such as the subject field it belongs to, and is associated to language sections, which are sets of language-specific terms that express the terminological concept.
+
+- Language section (langSec): a language section is a language-specific container for all terms that represent a terminological concept in a given language. The language section contains simple terms.
+
+- Term section (termSec): represents a language-specific term. A term section always contains a term with the text of the term and zero or more term notes (with term properties and linguistical properties) and descriptions (such as the reliability code of the term in relation to the concept). Related term notes are grouped in a term note group (termNoteGrp).
+
+Version 3 of TBX provides dialect-specific schema to constrain TBX files. The TBX Resource contains the dialect name associated with a corresponding external schema. In this package a provisional private dialect TBX-DNB is used that extends the public dialect TBX-Basic with additional linguistic annotations.
 
 * `Introduction to TermBase eXchange (TBX) Version 3 <https://www.tbxinfo.net/>`_
 

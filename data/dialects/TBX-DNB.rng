@@ -397,7 +397,6 @@
    </define>
    <define name="descrip">
       <element name="descrip">
-         
          <ref name="descrip.content"/>
          <ref name="descrip.localattributes"/>
       </element>
@@ -411,15 +410,12 @@
          <a:documentation xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0">Indicates
             the data-category type of the descrip element, such as definition or
             associated-concept.</a:documentation>
-         
             <ref name="descrip.types"/>
-         
       </attribute>
       <ref name="dca.attributes"/>
    </define>
    <define name="descripGrp">
       <element name="descripGrp">
-         
          <ref name="descripGrp.content"/>
          <ref name="descripGrp.localattributes"/>
       </element>
@@ -472,9 +468,7 @@
          <a:documentation xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0">Indicates
             the data-category type of the descripNote element, such as
             contextType.</a:documentation>
-         
             <ref name="descripNote.types"/>
-         
       </attribute>
       <ref name="dca.attributes"/>
    </define>
@@ -527,10 +521,10 @@
    <define name="ref.localattributes">
       <ref name="IDLangTgtDtyp.attributes"/>
       <attribute name="type">
-         
-         
             <ref name="ref.types"/>
-         
+      </attribute>
+      <attribute name="match">
+            <ref name="match.types"/>
       </attribute>
       <ref name="dca.attributes"/>
    </define>
@@ -558,6 +552,9 @@
       <oneOrMore>
          <ref name="langSec"/>
       </oneOrMore>
+      <zeroOrMore>
+         <ref name="ref"/>
+      </zeroOrMore>
    </define>
    <define name="conceptEntry.localattributes">
       <ref name="id.attribute.id"/>
@@ -1114,6 +1111,7 @@
          <value>context</value>
          <value>definition</value>
          <value>subjectField</value>
+         <value>reliabilityCode</value>
       </choice>
 
    </define>
@@ -1125,8 +1123,8 @@
          </documentation>
          <empty/>
       </choice>
-
    </define>
+
    <define name="ref.types">
       <choice>
          <documentation xmlns="http://relaxng.org/ns/compatibility/annotations/1.0">
@@ -1135,8 +1133,19 @@
          </documentation>
          <value>crossReference</value>
       </choice>
-
    </define>
+
+   <define name="match.types">
+      <choice>
+         <documentation xmlns="http://relaxng.org/ns/compatibility/annotations/1.0">
+            <p>For an integrated schema for use in DCA, replace &lt;text/&gt; with the allowed
+               values of the "type" attribute.</p>
+         </documentation>
+         <value>fullMatch</value>
+         <value>partialMatch</value>
+      </choice>
+   </define>
+   
    <define name="transac.types">
 
       <choice>
