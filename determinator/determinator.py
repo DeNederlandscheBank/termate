@@ -76,29 +76,53 @@ class TbxDocument(etree._ElementTree):
         return self
 
     def setup_tbx(self, params: dict = {}):
-        """ """
-        sub = etree.SubElement(self.getroot(), TBX_HEADER)
+        """Function to set up the header of a TbxDocument.
 
+        Metadata keys in params:         
+        - determinator.TITLE: list of title statements
+        - determinator.PUBLICATION: list of publication statements
+        - determinator.SOURCEDESC: list of source descriptions
+
+        Args:
+            params: dictionary containing the metadata of the Tbxdocument
+
+        Returns:
+            None
+
+        """
+        sub = etree.SubElement(self.getroot(), TBX_HEADER)
         filedesc = etree.SubElement(sub, QName(name=FILEDESC))
         if TITLE in params.keys():
-            s = etree.SubElement(filedesc, QName(name=TITLESTMT))
-            p = etree.SubElement(s, QName(name=TITLE))
-            p.text = params.get(TITLE)
+            for title_statement in params.get(TITLE):
+                s = etree.SubElement(filedesc, QName(name=TITLESTMT))
+                p = etree.SubElement(s, QName(name="p"))
+                p.text = title_statement
 
         if PUBLICATION in params.keys():
-            s = etree.SubElement(filedesc, QName(name=PUBLICATIONSTMT))
-            p = etree.SubElement(s, QName(name="p"))
-            p.text = params.get(PUBLICATION)
+            for publication_statement in params.get(PUBLICATION):
+                s = etree.SubElement(filedesc, QName(name=PUBLICATIONSTMT))
+                p = etree.SubElement(s, QName(name="p"))
+                p.text = publication_statement
 
         if SOURCEDESC in params.keys():
-            s = etree.SubElement(filedesc, QName(name=SOURCEDESC))
-            p = etree.SubElement(s, QName(name="p"))
-            p.text = params.get(SOURCEDESC)
+            for source_desc in params.get(SOURCEDESC):
+                s = etree.SubElement(filedesc, QName(name=SOURCEDESC))
+                p = etree.SubElement(s, QName(name="p"))
+                p.text = source_desc
 
         text = etree.SubElement(self.getroot(), QName(name=TEXT))
         body = etree.SubElement(text, QName(name=BODY))
 
     def clean(self, params: dict = {}):
+        """Function to delete all conceptEntries that have no langSec 
+
+        Args:
+            params: dictionary containing the metadata of the Tbxdocument
+
+        Returns:
+            None
+
+        """
         for xml_concept in self.findall(
             "text/body/conceptEntry", namespaces=NAMESPACES
         ):
@@ -113,16 +137,33 @@ class TbxDocument(etree._ElementTree):
         for child in self.find(TBX_HEADER, namespaces=NAMESPACES):
             if child.tag == QName(name=FILEDESC):
                 header[FILEDESC] = {}
+                sourcedesc = list()
+                titlestmt = list()
+                publicationstmt = list()
                 for child2 in child:
                     if child2.tag == QName(name=SOURCEDESC):
-                        header[FILEDESC][SOURCEDESC] = {}
                         for child3 in child2:
                             if child3.tag == QName(name="p"):
-                                header[FILEDESC][SOURCEDESC]["p"] = child3.text
+                                sourcedesc.append(child3.text)
+                    if child2.tag == QName(name=TITLESTMT):
+                        for child3 in child2:
+                            if child3.tag == QName(name="p"):
+                                titlestmt.append(child3.text)
+                    if child2.tag == QName(name=PUBLICATIONSTMT):
+                        for child3 in child2:
+                            if child3.tag == QName(name="p"):
+                                publicationstmt.append(child3.text)
+                if len(sourcedesc) > 0:
+                    header[FILEDESC][SOURCEDESC] = sourcedesc
+                if len(titlestmt) > 0:
+                    header[FILEDESC][TITLE] = titlestmt
+                if len(publicationstmt) > 0:
+                    header[FILEDESC][PUBLICATIONSTMT] = publicationstmt
         return header
 
     @property
     def concepts_list(self):
+        """Returns concepts of the TBX document as a list"""
         concepts = []
         for xml_concept in self.findall(
             "text/body/conceptEntry", namespaces=NAMESPACES

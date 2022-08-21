@@ -16,3 +16,9 @@ History
 ------------------
 
 * Change to generate XBRL termbases
+
+0.1.4 (2022-08-21)
+------------------
+
+* Improved documentation
+
