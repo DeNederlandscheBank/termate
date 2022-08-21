@@ -1,5 +1,5 @@
-Welcome to Nafigator's documentation!
-======================================
+Welcome to determinator's documentation!
+========================================
 
 .. toctree::
    :maxdepth: 2
