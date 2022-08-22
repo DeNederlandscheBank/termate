@@ -7,7 +7,7 @@ determinator
         :target: https://opensource.org/licenses/MIT
         :alt: License: MIT
 
-.. image:: https://readthedocs.org/projects/determinator/badge/?version=master
+.. image:: https://readthedocs.org/projects/determinator/badge
         :target: https://determinator.readthedocs.io/en/latest/?badge=master
         :alt: Documentation Status
 
