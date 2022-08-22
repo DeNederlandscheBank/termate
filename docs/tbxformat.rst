@@ -5,7 +5,7 @@ TBX, or TermBase eXchange, is an international standard for representing and exc
 
 * Header (tbxHeader): represents the metadata of the TBX Resource and contains the file description (fileDesc). The file description (fileDesc) contains (optional) title statement (titleStmt), publication statement (publicationStmt) and source description (sourceDesc).
 
-* Terminological concept (conceptEntry): represents a language-independent concept. Each terminological concept has a unique IS, is described by a set of properties, such as the subject field it belongs to, and is associated to language sections, which are sets of language-specific terms that express the terminological concept.
+* Terminological concept (conceptEntry): represents a language-independent concept. Each terminological concept has a unique ID, is described by a set of properties, such as the subject field it belongs to, and is associated to language sections, which are sets of language-specific terms that express the terminological concept.
 
 * Language section (langSec): a language section is a language-specific container for all terms that represent a terminological concept in a given language. The language section contains simple terms.
 
