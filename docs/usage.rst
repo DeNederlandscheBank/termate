@@ -10,9 +10,9 @@ The IATE termbase can be found here:
 
 Specific termbases are published in the `Termbase repository <https://data.world/wjwillemse/termbases>`_. They include:
 
-- EIOPA SolvencyII XBRL Taxonomy, version 2.6.0
+* EIOPA SolvencyII XBRL Taxonomy, version 2.6.0
 
-- EBA CRD XBRL Taxonomy, version 3.2.1.0
+* EBA CRD XBRL Taxonomy, version 3.2.1.0
 
 These termbases are based on supervisory XBRL Taxonomies (Solvency 2 and CRD). They contain all terms from a XBRL Taxonomy (derived from the labels of XBRL elements) combined with related IATE concepts and thereby available in all official European languages.
 
