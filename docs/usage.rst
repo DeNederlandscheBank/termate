@@ -21,7 +21,7 @@ If you have a TBX termbase available then you can read it in the following way:
 ::
 
     IATE_FILE = os.path.join("..", "data", "termbases", "IATE_export.tbx")
-    termbase = determinator.TbxDocument().open(IATE_FILE)
+    termbase = termate.TbxDocument().open(IATE_FILE)
 
 To get the concepts in the termbase as a list of dictionaries use:
 
@@ -59,14 +59,14 @@ We generate an empty TBX document with
 
 ::
 
-    termbase = determinator.TbxDocument()
+    termbase = termate.TbxDocument()
     termbase.generate(params = {
-        determinator.TBX_DIALECT: "TBX-DNB",
-        determinator.TBX_STYLE: "dca",
-        determinator.TBX_RELAXNG: "https://github.com/DeNederlandscheBank/determinator/blob/main/data/dialects/TBX-DNB.rng",
-        determinator.SOURCEDESC: ["TBX file, created via dnb/determinator"],
-        determinator.TITLE: ["Example termbase"],
-        determinator.PUBLICATION: ["Created on ..."]
+        termate.TBX_DIALECT: "TBX-DNB",
+        termate.TBX_STYLE: "dca",
+        termate.TBX_RELAXNG: "https://github.com/DeNederlandscheBank/termate/blob/main/data/dialects/TBX-DNB.rng",
+        termate.SOURCEDESC: ["TBX file, created via dnb/termate"],
+        termate.TITLE: ["Example termbase"],
+        termate.PUBLICATION: ["Created on ..."]
     })
 
 Then we extract terms from the Solvency II Delegated Acts (Dutch version) in NAF:
@@ -78,7 +78,7 @@ Then we extract terms from the Solvency II Delegated Acts (Dutch version) in NAF
     for language in ['NL', 'EN', 'DE', 'FR', 'ES', 'ET', 'DA', 'SV']:
         DOC_FILE = "..\\..\\nafigator-data\\data\\legislation\\Solvency II Delegated Acts - "+language+".naf.xml"
         doc = nafigator.NafDocument().open(DOC_FILE)
-        determinator.merge_terms_dict(terms, nafigator.extract_terms(doc))
+        termate.merge_terms_dict(terms, nafigator.extract_terms(doc))
 
 Then we create a termbase
 
@@ -94,7 +94,7 @@ Then we add references from the InterActive Terminology for Europe (IATE) datase
 
     # read the IATE file
     IATE_FILE = "..//data//iate//IATE_export.tbx"
-    ref = determinator.TbxDocument().open(IATE_FILE)
+    ref = termate.TbxDocument().open(IATE_FILE)
     termbase.copy_from_tbx(reference=ref)
 
 Then we add termnotes from the Dutch Lassy dataset (the small one) including basic insurance terms:
@@ -103,7 +103,7 @@ Then we add termnotes from the Dutch Lassy dataset (the small one) including bas
 
     # read the lassy file
     LASSY_FILE = "..//data//lassy//lassy_with_insurance.tbx"
-    lassy = determinator.TbxDocument().open(LASSY_FILE)
+    lassy = termate.TbxDocument().open(LASSY_FILE)
     termbase.add_termnotes_from_tbx(reference=lassy, params={'number_of_word_components':  5})
 
 Then we have a termbase with:

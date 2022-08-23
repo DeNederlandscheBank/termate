@@ -22,3 +22,7 @@ History
 
 * Improved documentation
 
+0.1.5 (2022-08-23)
+------------------
+
+* Changed name of package to termate

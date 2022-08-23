@@ -2,7 +2,7 @@
 
 """Convert2rdf module.
 
-This module contains RDF conversion functions for determinator package
+This module contains RDF conversion functions for termate package
 
 """
 from .vocab import ONTOLEX

@@ -8,13 +8,13 @@ Installation
 Stable release
 --------------
 
-To install determinator, run this command in your terminal:
+To install termate, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install determinator
+    $ pip install termate
 
-This is the preferred method to install determinator, as it will always install the most recent stable release.
+This is the preferred method to install termate, as it will always install the most recent stable release.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -26,13 +26,13 @@ you through the process.
 From sources
 ------------
 
-The sources for determinator can be downloaded from the `Github repo`_.
+The sources for termate can be downloaded from the `Github repo`_.
 
 You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/DeNederlandscheBank/determinator
+    $ git clone git://github.com/DeNederlandscheBank/termate
 
 Once you have a copy of the source, you can install it with:
 
@@ -41,4 +41,4 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/DeNederlandscheBank/determinator
+.. _Github repo: https://github.com/DeNederlandscheBank/termate

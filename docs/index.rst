@@ -1,4 +1,4 @@
-Welcome to determinator's documentation!
+Welcome to termate's documentation!
 ========================================
 
 .. toctree::

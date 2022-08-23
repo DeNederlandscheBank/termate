@@ -6,7 +6,7 @@
 import unittest
 from click.testing import CliRunner
 
-from determinator import determinator
+from termate import termate
 
 
 class TestTerminator(unittest.TestCase):
@@ -17,8 +17,8 @@ class TestTerminator(unittest.TestCase):
 
     def test_000_something(self):
         """Test something."""
-        t = determinator.TbxDocument()
-        params = {"sourceDesc": "TBX file, created via dnb/determinator"}
+        t = termate.TbxDocument()
+        params = {"sourceDesc": "TBX file, created via dnb/termate"}
         t.generate(params)
         c = {
             "id": "c1",
@@ -50,7 +50,7 @@ class TestTerminator(unittest.TestCase):
 
         print(t.validate())
 
-        t = determinator.TbxDocument().open(
+        t = termate.TbxDocument().open(
             "data//examples//Example_Astronomy_DCA_VALID.tbx"
         )
         print(t.validate())

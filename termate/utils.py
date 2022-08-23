@@ -2,7 +2,7 @@
 
 """Utils module.
 
-This module contains utility functions determinator package
+This module contains utility functions termate package
 
 """
 

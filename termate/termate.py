@@ -79,9 +79,9 @@ class TbxDocument(etree._ElementTree):
         """Function to set up the header of a TbxDocument.
 
         Metadata keys in params:         
-        - determinator.TITLE: list of title statements
-        - determinator.PUBLICATION: list of publication statements
-        - determinator.SOURCEDESC: list of source descriptions
+        - termate.TITLE: list of title statements
+        - termate.PUBLICATION: list of publication statements
+        - termate.SOURCEDESC: list of source descriptions
 
         Args:
             params: dictionary containing the metadata of the Tbxdocument

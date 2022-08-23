@@ -2,7 +2,7 @@
 
 """Convert2skos module.
 
-This module contains conversion functions for the determinator package
+This module contains conversion functions for the termate package
 
 """
 
@@ -29,7 +29,7 @@ from .const import TEXT
 from .const import BODY
 from .const import TITLE
 from .const import QName
-from .determinator import TbxDocument
+from .termate import TbxDocument
 
 
 def get_concepts(g: rdflib.Graph = None):

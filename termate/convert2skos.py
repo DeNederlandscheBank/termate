@@ -2,7 +2,7 @@
 
 """Convert2skos module.
 
-This module contains SKOS/RDF conversion functions for determinator package
+This module contains SKOS/RDF conversion functions for termate package
 
 """
 
@@ -10,7 +10,7 @@ import sys
 import click
 from io import StringIO, BytesIO
 
-from .determinator import TbxDocument
+from .termate import TbxDocument
 from lxml import etree
 import rdflib
 import logging

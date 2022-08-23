@@ -15,7 +15,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/DeNederlandscheBank/determinator/issues.
+Report bugs at https://github.com/DeNederlandscheBank/termate/issues.
 
 If you are reporting a bug, please include:
 
@@ -38,14 +38,14 @@ and "help wanted" is open to whoever wants to implement it.
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-determinator could always use more documentation, whether as part of the
-official determinator docs, in docstrings, or even on the web in blog posts,
+termate could always use more documentation, whether as part of the
+official termate docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/DeNederlandscheBank/determinator/issues.
+The best way to send feedback is to file an issue at https://github.com/DeNederlandscheBank/termate/issues.
 
 If you are proposing a feature:
 
@@ -57,17 +57,17 @@ If you are proposing a feature:
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `determinator` for local development.
+Ready to contribute? Here's how to set up `termate` for local development.
 
-1. Fork the `determinator` repo on GitHub.
+1. Fork the `termate` repo on GitHub.
 2. Clone your fork locally::
 
-    $ git clone git@github.com:your_name_here/determinator.git
+    $ git clone git@github.com:your_name_here/termate.git
 
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
-    $ mkvirtualenv determinator
-    $ cd determinator/
+    $ mkvirtualenv termate
+    $ cd termate/
     $ python setup.py develop
 
 4. Create a branch for local development::
@@ -79,7 +79,7 @@ Ready to contribute? Here's how to set up `determinator` for local development.
 5. When you're done making changes, check that your changes pass flake8 and the
    tests, including testing other Python versions with tox::
 
-    $ flake8 determinator tests
+    $ flake8 termate tests
     $ python setup.py test or pytest
     $ tox
 
@@ -110,7 +110,7 @@ Tips
 To run a subset of tests::
 
 
-    $ python -m unittest tests.test_determinator
+    $ python -m unittest tests.test_termate
 
 Deploying
 ---------

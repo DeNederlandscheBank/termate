@@ -1,14 +1,14 @@
-============
-determinator
-============
+=======
+termate
+=======
 
 
 .. image:: https://img.shields.io/badge/License-MIT-yellow.svg
         :target: https://opensource.org/licenses/MIT
         :alt: License: MIT
 
-.. image:: https://readthedocs.org/projects/determinator/badge
-        :target: https://determinator.readthedocs.io/en/latest/?badge=master
+.. image:: https://readthedocs.org/projects/termate/badge
+        :target: https://termate.readthedocs.io/en/latest/?badge=master
         :alt: Documentation Status
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg

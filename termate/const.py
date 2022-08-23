@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This module contains constants from determinator
+This module contains constants from termate
 
 """
 
