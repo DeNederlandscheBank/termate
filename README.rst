@@ -8,7 +8,7 @@ Termate
         :alt: License: MIT
 
 .. image:: https://readthedocs.org/projects/termate/badge
-        :target: https://termate.readthedocs.io/en/latest/?badge=master
+        :target: https://termate.readthedocs.io/en/latest/?badge=main
         :alt: Documentation Status
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
