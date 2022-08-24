@@ -4,6 +4,7 @@ from rdflib import Graph, URIRef, Literal
 from .vocab import *
 from lxml import etree
 import logging
+import iribaker
 
 from .const import NAMESPACES
 from .const import XML_LANG
@@ -31,7 +32,7 @@ class LemonBase(object):
     @property
     def uri(self):
         if self._uri is not None:
-            return URIRef(clean_uri(self._uri))
+            return URIRef(iribaker.to_iri(self._uri))
         else:
             return None
 
@@ -226,14 +227,6 @@ class LemonComponent(LemonBase):
         for triple in self.lexicalEntry.triples():
             yield triple
 
-def clean_uri(uri: str=""):
-    uri = uri.replace('`', '')
-    uri = uri.replace('"', '')
-    uri = uri.replace('<i>', '')
-    uri = uri.replace('</i>', '')
-    uri = uri.replace('<small>', '')
-    uri = uri.replace('</small>', '')
-    return uri
 
 class tbx2lemon(object):
 
@@ -259,7 +252,7 @@ class tbx2lemon(object):
         tbx_style = termbase.getroot().attrib.get("style", "dca")
         tbx_language = termbase.getroot().attrib.get(XML_LANG, "en")
 
-        lemon_header = LemonHeader(uri=uri,
+        lemon_header = LemonHeader(uri=uri+'/header',
                                    dct_type=dct_type,
                                    tbx_sourcedesc=tbx_sourcedesc)
 
@@ -337,8 +330,8 @@ class tbx2lemon(object):
                                 lemon_entries.append(component_list)
                     # elif langSec.tag==QName(name="ref"):
                     # elif langSec.tag==QName(name="descrip"):
-                    else:
-                        logging.warning("conceptEntry element not found: " + langSec.tag)
+                    # else:
+                    #     logging.warning("conceptEntry element not found: " + langSec.tag)
 
 
         for triple in lemon_header.triples():
