@@ -1,5 +1,5 @@
 =======
-termate
+Termate
 =======
 
 
@@ -15,18 +15,26 @@ termate
         :target: https://github.com/psf/black
         :alt: Code style: black
 
+*Your Python companion for using terminology databases in NLP analyses*
+
+*Termate* is a Python package for terminology management with the TermBase eXchange (TBX) format
+
 **DISCLAIMER - BETA PHASE**
 
 *This package is currently in a beta phase.*
 
-Package for terminology management with the TermBase eXchange (TBX) format
-
 * Free software: MIT license
 
+Documentation can be found here `here <https://termate.readthedocs.io/en/latest/>`_
 
-Features
---------
 
-- Use existing TBX termbases within NLP analyses (TBX version 3)
+Main features
+-------------
 
-- Create TBX termbases based on extracted terms from documents
+* Using existing TBX termbases in NLP analyses (TBX version 3)
+
+* Creating TBX termbases based on extracted terms from documents
+
+* Converting TBX termbases to Semantic Web data (OntoLex Lemon)
+
+*Termate* works closely with the nafigator package.

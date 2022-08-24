@@ -7,7 +7,8 @@ Welcome to termate's documentation!
 
    readme
    installation
-   usage
+   termbases
+   term_extraction
    tbxformat
    contributing
    authors

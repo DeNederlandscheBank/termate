@@ -6,12 +6,9 @@ sphinx==3.4.3
 sphinx_rtd_theme==0.5.1
 readthedocs-sphinx-search==0.1.0
 lxml
-termate
-stanza
-spacy
 pandas
-camelot-py[cv]==0.10.1
-camelot-py[base]==0.10.1
 pdftopng==0.2.3
 jinja2<3.1
 nafigator
+iribaker
+termate
