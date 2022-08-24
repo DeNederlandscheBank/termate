@@ -15,7 +15,9 @@ Termate
         :target: https://github.com/psf/black
         :alt: Code style: black
 
-*Your Python companion for using terminology databases in NLP analyses*
+
+*Your Python companion for using termbases in NLP analyses*
+
 
 *Termate* is a Python package for terminology management with the TermBase eXchange (TBX) format
 
