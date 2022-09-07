@@ -6,12 +6,11 @@ A terminology database (termbase) forms a structured way to store and exchange d
 The IATE termbase
 -----------------
 
-The IATE termbase can be found here:
+The IATE termbase can be found here
 
+* `Interactive Terminology for Europe <https://iate.europa.eu/home/>`_.
 
-* `Interactive Terminology for Europe <https://iate.europa.eu/home/>`_
-
-An conceptEntry looks like this:
+A conceptEntry looks like this:
 
 ::
 
@@ -38,6 +37,7 @@ An conceptEntry looks like this:
           <descrip type="reliabilityCode">9</descrip>
         </termSec>
       </langSec>
+      ...
       </conceptEntry>
 
 
@@ -46,12 +46,9 @@ The Supervisory termbases
 
 Specific termbases are published on data.world in the `Termbase repository <https://data.world/wjwillemse/termbases>`_. They include:
 
-
 * EIOPA Solvency 2 XBRL Taxonomy, version 2.6.0
 
-
 * EBA CRD XBRL Taxonomy, version 3.2.1.0
-
 
 These termbases combine three data sources: terms from a supervisory XBRL Taxonomy (derived from the labels of XBRL elements), terms from the IATE termbase that match the labels of the XBRL elements (available in all official European languages) and language-specific linguistic annotations to each term from an NLP processor.
 
