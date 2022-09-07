@@ -152,3 +152,31 @@ The results of the first concept in the list then look for example like this:
     ]]
     ...
     
+
+Annotating NAF files
+--------------------
+
+To annotate a NAF file with the content of a termbase open both files:
+
+::
+
+    naf_file = "P:\\projects\\naf-data\\data\examples\\exmaple.naf.xml"
+    doc = nafigator.NafDocument().open(naf_file)
+
+    tbx_file = "P:\\projects\\tbx-data\\termbases\\EIOPA_SolvencyII_XBRL_Taxonomy_2.6.0_PWD_with_External_Files.tbx"
+    termbase = termate.TbxDocument().open(tbx_file)
+
+Then create a termbase processor and process with the processor the document:
+
+::
+
+    t = nafigator.TermbaseProcessor(termbase)
+    t.process(doc=doc)
+
+On initialization the TermbaseProcessor creates a fast way to access the terms in the termbase. After initialization you can process multiple documents with the same termbase by calling the process function.
+
+Now you can overwrite the existing NAF file or store it under a different name
+
+::
+
+    doc.write(naf_file)
