@@ -8,8 +8,9 @@ Welcome to termate's documentation!
    readme
    installation
    termbases
-   term_extraction
    tbxformat
+   tbx2lemon
+   term_extraction
    contributing
    authors
    history

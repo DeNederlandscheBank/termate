@@ -39,4 +39,4 @@ Main features
 
 * Converting TBX termbases to Semantic Web data (OntoLex Lemon)
 
-*Termate* works closely with the nafigator package.
+Termate works together with `nafigator <https://github.com/DeNederlandscheBank/nafigator/>`_.

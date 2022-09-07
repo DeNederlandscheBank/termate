@@ -1,8 +1,8 @@
 Term extraction
----------------
+===============
 
 Create a termbase from extracted terms
-======================================
+--------------------------------------
 
 We generate an empty TBX document with
 
