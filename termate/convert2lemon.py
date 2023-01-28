@@ -24,9 +24,9 @@ from .const import TEXT
 from .const import BODY
 from .const import QName
 
-class LemonBase(object):
 
-    def __init__(self, uri: str=None):
+class LemonBase(object):
+    def __init__(self, uri: str = None):
         self._uri = uri
 
     @property
@@ -36,17 +36,19 @@ class LemonBase(object):
         else:
             return None
 
-    def set_uri(self, uri: str=None):
+    def set_uri(self, uri: str = None):
         self._uri = uri
 
-class LemonHeader(LemonBase):
 
-    def __init__(self,
-                 dc_source: str = None, 
-                 dct_type: str = "TBX-Basic",
-                 tbx_encodingdesc: str = "<p type=\"XCSURI\">TBXXCS.xcs</p>",
-                 tbx_sourcedesc: str = None,
-                 uri: str=None):
+class LemonHeader(LemonBase):
+    def __init__(
+        self,
+        dc_source: str = None,
+        dct_type: str = "TBX-Basic",
+        tbx_encodingdesc: str = '<p type="XCSURI">TBXXCS.xcs</p>',
+        tbx_sourcedesc: str = None,
+        uri: str = None,
+    ):
         self.dc_source = dc_source
         self.dct_type = dct_type
         self.tbx_encodingdesc = tbx_encodingdesc
@@ -69,11 +71,9 @@ class LemonHeader(LemonBase):
             if self.tbx_sourcedesc is not None:
                 yield (self.uri, TBX.sourceDesc, Literal(self.tbx_sourcedesc))
 
-class LemonConcept(LemonBase):
 
-    def __init__(self,
-                 subjectField: str=None,
-                 uri: str=None):
+class LemonConcept(LemonBase):
+    def __init__(self, subjectField: str = None, uri: str = None):
         self.subjectField = subjectField
         super().__init__(uri)
 
@@ -82,15 +82,13 @@ class LemonConcept(LemonBase):
         Generates all the triples
         """
         if self.uri is not None:
-            yield(self.uri, RDF.type, SKOS.Concept)
+            yield (self.uri, RDF.type, SKOS.Concept)
             if self.subjectField is not None:
-                yield(self.uri, TBX.subjectField, Literal(self.subjectField))
+                yield (self.uri, TBX.subjectField, Literal(self.subjectField))
+
 
 class LemonLexicon(LemonBase):
-
-    def __init__(self,
-                 language: str=None,
-                 uri: str=None):
+    def __init__(self, language: str = None, uri: str = None):
         self.language = language
         super().__init__(uri)
 
@@ -99,21 +97,22 @@ class LemonLexicon(LemonBase):
         Generates all the triples
         """
         if self.uri is not None:
-            yield(self.uri, RDF.type, ONTOLEX.Lexicon)
-            yield(self.uri, ONTOLEX.language, Literal(self.language))
+            yield (self.uri, RDF.type, ONTOLEX.Lexicon)
+            yield (self.uri, ONTOLEX.language, Literal(self.language))
 
 
 class LemonLexicalEntry(LemonBase):
-
-    def __init__(self,
-                 lexicon: LemonLexicon=None,
-                 term: str=None,
-                 reliabilityCode: int=None,
-                 termType: str=None,
-                 termLemma: str=None,
-                 partOfSpeech: str=None,
-                 reference: str=None,
-                 uri: str=None):
+    def __init__(
+        self,
+        lexicon: LemonLexicon = None,
+        term: str = None,
+        reliabilityCode: int = None,
+        termType: str = None,
+        termLemma: str = None,
+        partOfSpeech: str = None,
+        reference: str = None,
+        uri: str = None,
+    ):
         self.lexicon = lexicon
         self.reliabilityCode = reliabilityCode
         self.termType = termType
@@ -128,38 +127,51 @@ class LemonLexicalEntry(LemonBase):
         Generates all the triples
         """
         if self.uri is not None:
-            yield(self.lexicon.uri, ONTOLEX.entry, self.uri)
-            yield(self.uri, RDF.type, ONTOLEX.LexicalEntry)
+            yield (self.lexicon.uri, ONTOLEX.entry, self.uri)
+            yield (self.uri, RDF.type, ONTOLEX.LexicalEntry)
 
-            if len(self.term.split(" "))>1:
-                yield(self.uri, RDF.type, ONTOLEX.MultiWordExpression)
+            if len(self.term.split(" ")) > 1:
+                yield (self.uri, RDF.type, ONTOLEX.MultiWordExpression)
             else:
                 if self.partOfSpeech is not None:
-                    yield(self.uri, LEXINFO.partOfSpeech, Literal(self.partOfSpeech))
+                    yield (self.uri, LEXINFO.partOfSpeech, Literal(self.partOfSpeech))
                 if self.termType is not None:
-                    if self.termType=="abbreviation":
-                        yield(self.uri, RDF.type, ONTOLEX.Acronym)
+                    if self.termType == "abbreviation":
+                        yield (self.uri, RDF.type, ONTOLEX.Acronym)
                     else:
-                        yield(self.uri, RDF.type, ONTOLEX.Word)
+                        yield (self.uri, RDF.type, ONTOLEX.Word)
                 else:
-                    yield(self.uri, RDF.type, ONTOLEX.Word)
+                    yield (self.uri, RDF.type, ONTOLEX.Word)
             if self.reliabilityCode is not None:
-                yield(self.uri, TBX.reliabilityCode, Literal(self.reliabilityCode))
+                yield (self.uri, TBX.reliabilityCode, Literal(self.reliabilityCode))
             if self.termType is not None:
-                yield(self.uri, TBX.termType, Literal(self.termType))
-            yield(self.uri, ONTOLEX.language, Literal(self.lexicon.language))
+                yield (self.uri, TBX.termType, Literal(self.termType))
+            yield (self.uri, ONTOLEX.language, Literal(self.lexicon.language))
 
             # the canonical form for single words is the lemma of that word
             if self.termLemma is not None:
-                yield(self.uri, ONTOLEX.canonicalForm, URIRef(self.uri+"#CanonicalForm"))
-                yield(URIRef(self.uri+"#CanonicalForm"), RDF.type, ONTOLEX.Form)
-                yield(URIRef(self.uri+"#CanonicalForm"), ONTOLEX.writtenRep, Literal(self.termLemma, lang=self.lexicon.language))
+                yield (
+                    self.uri,
+                    ONTOLEX.canonicalForm,
+                    URIRef(self.uri + "#CanonicalForm"),
+                )
+                yield (URIRef(self.uri + "#CanonicalForm"), RDF.type, ONTOLEX.Form)
+                yield (
+                    URIRef(self.uri + "#CanonicalForm"),
+                    ONTOLEX.writtenRep,
+                    Literal(self.termLemma, lang=self.lexicon.language),
+                )
 
             if self.reference is not None:
-                yield(self.uri, ONTOLEX.sense, URIRef(self.uri+"#Sense"))
-                yield(URIRef(self.uri+"#Sense"), ONTOLEX.reference, URIRef(self.reference))
+                yield (self.uri, ONTOLEX.sense, URIRef(self.uri + "#Sense"))
+                yield (
+                    URIRef(self.uri + "#Sense"),
+                    ONTOLEX.reference,
+                    URIRef(self.reference),
+                )
 
-            yield(self.uri, RDFS.label, Literal(self.term, self.lexicon.language))
+            yield (self.uri, RDFS.label, Literal(self.term, self.lexicon.language))
+
 
 # :Zust%C3%A4ndigkeit+der+Mitgliedstaaten-de#ComponentList decomp:identifies
 #     :Zust%C3%A4ndigkeit+der+Mitgliedstaaten-de ;
@@ -174,28 +186,29 @@ class LemonLexicalEntry(LemonBase):
 #   rdfs:label             "Zuständigkeit"@de ;
 #   tbx:grammaticalNumber  tbx:singular ;
 #   tbx:partOfSpeech       tbx:noun.
-                
+
 # :der-de
 #   a                 ontolex:LexicalEntry ;
 #   rdfs:label        "der"@en ;
 #   tbx:partOfSpeech  tbx:other.
-              
+
 # :Mitgliedstaaten-de
 #   a                 ontolex:LexicalEntry ;
 #   rdfs:label        "Mitgliedstaat"@en ;
 #   tbx:partOfSpeech  tbx:singular ;
 #   tbx:grammaticalNumber tbx:plural
 
-class LemonComponentList(LemonBase):
 
-    def __init__(self,
-                 lexicalEntry: LemonLexicalEntry=None,
-                 components: list=None,
-                 uri: str=None):
+class LemonComponentList(LemonBase):
+    def __init__(
+        self,
+        lexicalEntry: LemonLexicalEntry = None,
+        components: list = None,
+        uri: str = None,
+    ):
         self.lexicalEntry = lexicalEntry
         self.components = list()
         super().__init__(uri)
-
 
     def triples(self):
         """
@@ -203,16 +216,19 @@ class LemonComponentList(LemonBase):
         """
         # yield(self.uri, DECOMP.identifies, URIRef(self.lexicalEntry.uri))
         for component in self.components:
-            yield(self.uri, DECOMP.constituent, component.uri)
+            yield (self.uri, DECOMP.constituent, component.uri)
             for triple in component.triples():
                 yield triple
 
+
 class LemonComponent(LemonBase):
-    def __init__(self,
-                 term: str=None,
-                 language: str=None,
-                 lexicalEntry: LemonLexicalEntry=None,
-                 uri: str=None):
+    def __init__(
+        self,
+        term: str = None,
+        language: str = None,
+        lexicalEntry: LemonLexicalEntry = None,
+        uri: str = None,
+    ):
         self.term = term
         self.language = language
         self.lexicalEntry = lexicalEntry
@@ -222,17 +238,14 @@ class LemonComponent(LemonBase):
         """
         Generates all the triples
         """
-        yield(self.uri, RDF.type, DECOMP.Component)
-        yield(self.uri, DECOMP.correspondsTo, self.lexicalEntry.uri)
+        yield (self.uri, RDF.type, DECOMP.Component)
+        yield (self.uri, DECOMP.correspondsTo, self.lexicalEntry.uri)
         for triple in self.lexicalEntry.triples():
             yield triple
 
 
 class tbx2lemon(object):
-
-    def __init__(self,
-                 uri: str=None,
-                 termbase: etree._ElementTree=None):
+    def __init__(self, uri: str = None, termbase: etree._ElementTree = None):
         self.graph = Graph()
         self.graph.bind("tbx", TBX)
         self.graph.bind("ontolex", ONTOLEX)
@@ -252,16 +265,18 @@ class tbx2lemon(object):
         tbx_style = termbase.getroot().attrib.get("style", "dca")
         tbx_language = termbase.getroot().attrib.get(XML_LANG, "en")
 
-        lemon_header = LemonHeader(uri=uri+'/header',
-                                   dct_type=dct_type,
-                                   tbx_sourcedesc=tbx_sourcedesc)
+        lemon_header = LemonHeader(
+            uri=uri + "/header", dct_type=dct_type, tbx_sourcedesc=tbx_sourcedesc
+        )
 
         languages = set()
 
         lemon_concepts = list()
         lemon_entries = list()
         lemon_lexicons = dict()
-        for concept in termbase.findall("text/body/conceptEntry", namespaces=NAMESPACES):
+        for concept in termbase.findall(
+            "text/body/conceptEntry", namespaces=NAMESPACES
+        ):
 
             concept_id = concept.attrib["id"]
 
@@ -269,44 +284,62 @@ class tbx2lemon(object):
 
                 subjectField = None
                 for element in concept:
-                    if element.tag==QName(name="descrip") and element.attrib.get("type", "")=="subjectField":
+                    if (
+                        element.tag == QName(name="descrip")
+                        and element.attrib.get("type", "") == "subjectField"
+                    ):
                         subjectField = element.text
 
-                lemon_concepts.append(LemonConcept(uri=uri+"/"+concept_id,
-                                                   subjectField=subjectField))
+                lemon_concepts.append(
+                    LemonConcept(uri=uri + "/" + concept_id, subjectField=subjectField)
+                )
 
                 for langSec in concept:
-                    if langSec.tag==QName(name="langSec"):
+                    if langSec.tag == QName(name="langSec"):
                         lang = langSec.attrib.get(XML_LANG, None)
 
                         if lang not in lemon_lexicons.keys():
-                            lemon_lexicons[lang] = LemonLexicon(uri=uri+"/lexicon/"+lang, language=lang)
+                            lemon_lexicons[lang] = LemonLexicon(
+                                uri=uri + "/lexicon/" + lang, language=lang
+                            )
 
                         for termSec in langSec:
-                            lexicalEntry = LemonLexicalEntry(lexicon=lemon_lexicons[lang])
-                            lexicalEntry.reference = uri+"/"+concept_id
+                            lexicalEntry = LemonLexicalEntry(
+                                lexicon=lemon_lexicons[lang]
+                            )
+                            lexicalEntry.reference = uri + "/" + concept_id
                             for element in termSec:
-                                if element.tag==QName(name="term"):
-                                    lemon_entry_uri = uri+"/"+"+".join(element.text.split(" "))+"-"+lang
+                                if element.tag == QName(name="term"):
+                                    lemon_entry_uri = (
+                                        uri
+                                        + "/"
+                                        + "+".join(element.text.split(" "))
+                                        + "-"
+                                        + lang
+                                    )
                                     lexicalEntry.set_uri(lemon_entry_uri)
                                     lexicalEntry.term = element.text
-                                elif element.tag==QName(name="termNote"):
+                                elif element.tag == QName(name="termNote"):
                                     termnote_type = element.attrib.get("type", None)
-                                    if termnote_type=="termType":
+                                    if termnote_type == "termType":
                                         lexicalEntry.termType = element.text
-                                    elif termnote_type=="termLemma":
+                                    elif termnote_type == "termLemma":
                                         lexicalEntry.termLemma = element.text
-                                    elif termnote_type=="partOfSpeech":
+                                    elif termnote_type == "partOfSpeech":
                                         lexicalEntry.partOfSpeech = element.text
                                     # administrativeStatus not yet done
-                                elif element.tag==QName(name="descrip"):
+                                elif element.tag == QName(name="descrip"):
                                     descrip_type = element.attrib.get("type", None)
-                                    if descrip_type=="reliabilityCode":
+                                    if descrip_type == "reliabilityCode":
                                         lexicalEntry.reliabilityCode = element.text
                                     else:
-                                        logging.warning("descrip type not found: " + descrip_type)
+                                        logging.warning(
+                                            "descrip type not found: " + descrip_type
+                                        )
                                 else:
-                                    logging.warning("termSec element not found: " + element.tag)
+                                    logging.warning(
+                                        "termSec element not found: " + element.tag
+                                    )
 
                             lemon_entries.append(lexicalEntry)
 
@@ -315,24 +348,32 @@ class tbx2lemon(object):
                                 component_list = LemonComponentList(
                                     # uri=lexicalEntry.uri+"#ComponentList",
                                     uri=lexicalEntry.uri,
-                                    lexicalEntry=lexicalEntry)
+                                    lexicalEntry=lexicalEntry,
+                                )
                                 for idx, component in enumerate(components):
                                     component_lexicalEntry = LemonLexicalEntry(
-                                        uri=uri+"/"+component+"-"+lang,
+                                        uri=uri + "/" + component + "-" + lang,
                                         lexicon=lemon_lexicons[lang],
                                         term=component,
-                                        partOfSpeech=lexicalEntry.partOfSpeech.split(", ")[idx] if lexicalEntry.partOfSpeech is not None else None)
+                                        partOfSpeech=lexicalEntry.partOfSpeech.split(
+                                            ", "
+                                        )[idx]
+                                        if lexicalEntry.partOfSpeech is not None
+                                        else None,
+                                    )
                                     lemon_component = LemonComponent(
-                                        uri=lexicalEntry.uri+"#component"+str(idx+1),
+                                        uri=lexicalEntry.uri
+                                        + "#component"
+                                        + str(idx + 1),
                                         term=component,
-                                        lexicalEntry=component_lexicalEntry)
+                                        lexicalEntry=component_lexicalEntry,
+                                    )
                                     component_list.components.append(lemon_component)
                                 lemon_entries.append(component_list)
                     # elif langSec.tag==QName(name="ref"):
                     # elif langSec.tag==QName(name="descrip"):
                     # else:
                     #     logging.warning("conceptEntry element not found: " + langSec.tag)
-
 
         for triple in lemon_header.triples():
             self.graph.add(triple)

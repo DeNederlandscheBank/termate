@@ -6,10 +6,11 @@ DCAT = rdflib.namespace.DCAT
 DC = rdflib.namespace.DC
 DCT = rdflib.namespace.DCTERMS
 SKOS = rdflib.namespace.SKOS
-TBX = rdflib.Namespace('http://tbx2rdf.lider-project.eu/tbx#')
-ONTOLEX = rdflib.Namespace('http://www.w3.org/ns/lemon/ontolex#')
-LEXINFO = rdflib.Namespace('http://www.lexinfo.net/ontology/3.0/lexinfo#')
-DECOMP = rdflib.Namespace('http://www.w3.org/ns/lemon/decomp#')
+TBX = rdflib.Namespace("http://tbx2rdf.lider-project.eu/tbx#")
+ONTOLEX = rdflib.Namespace("http://www.w3.org/ns/lemon/ontolex#")
+LEXINFO = rdflib.Namespace("http://www.lexinfo.net/ontology/3.0/lexinfo#")
+DECOMP = rdflib.Namespace("http://www.w3.org/ns/lemon/decomp#")
+
 
 class IATE:
     def __init__(self):

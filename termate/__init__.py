@@ -2,7 +2,7 @@
 
 __author__ = """Willem Jan Willemse"""
 __email__ = "w.j.willemse@dnb.nl"
-__version__ = "0.1.5"
+__version__ = "0.1.6"
 
 from .termate import *
 from .importskos import *
@@ -12,4 +12,4 @@ from .convert2lemon import *
 from .utils import *
 from .vocab import *
 from .types import *
-
+from .lemonobjects import *

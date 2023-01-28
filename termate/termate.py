@@ -78,7 +78,7 @@ class TbxDocument(etree._ElementTree):
     def setup_tbx(self, params: dict = {}):
         """Function to set up the header of a TbxDocument.
 
-        Metadata keys in params:         
+        Metadata keys in params:
         - termate.TITLE: list of title statements
         - termate.PUBLICATION: list of publication statements
         - termate.SOURCEDESC: list of source descriptions
@@ -114,7 +114,7 @@ class TbxDocument(etree._ElementTree):
         body = etree.SubElement(text, QName(name=BODY))
 
     def clean(self, params: dict = {}):
-        """Function to delete all conceptEntries that have no langSec 
+        """Function to delete all conceptEntries that have no langSec
 
         Args:
             params: dictionary containing the metadata of the Tbxdocument
