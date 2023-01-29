@@ -2,7 +2,7 @@
 
 __author__ = """Willem Jan Willemse"""
 __email__ = "w.j.willemse@dnb.nl"
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 
 from .termate import *
 from .importskos import *

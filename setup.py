@@ -10,23 +10,22 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['Click>=7.0', 'xlsxwriter', 'rdflib', 'iribaker']
+requirements = ['Click>=7.0', 'xlsxwriter', 'rdflib', 'iribaker', 'lxml', 'regex']
 
-test_requirements = [ ]
+test_requirements = ['Click>=7.0', 'xlsxwriter', 'rdflib', 'iribaker', 'lxml', 'nafigator', 'regex']
 
 setup(
     author="Willem Jan Willemse",
     author_email='w.j.willemse@dnb.nl',
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     description="Package for terminology management with TermBase eXchange (TBX)",
     entry_points={
@@ -44,6 +43,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/DeNederlandscheBank/termate',
-    version='0.1.6',
+    version='0.1.7',
     zip_safe=False,
 )
