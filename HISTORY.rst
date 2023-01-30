@@ -27,7 +27,7 @@ History
 
 * Changed name of package to termate
 
-0.1.7 (2023-01-29)
+0.1.8 (2023-01-30)
 ------------------
 
 * Added lemon objects
