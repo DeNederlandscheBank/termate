@@ -23,6 +23,7 @@ from .const import LANGSEC
 from .const import TEXT
 from .const import BODY
 from .const import QName
+from .const import upos2olia
 
 
 class LemonBase(object):
@@ -134,7 +135,8 @@ class LemonLexicalEntry(LemonBase):
                 yield (self.uri, RDF.type, ONTOLEX.MultiWordExpression)
             else:
                 if self.partOfSpeech is not None:
-                    yield (self.uri, LEXINFO.partOfSpeech, Literal(self.partOfSpeech))
+                    if isinstance(self.partOfSpeech, URIRef):
+                        yield (self.uri, LEXINFO.partOfSpeech, self.partOfSpeech)
                 if self.termType is not None:
                     if self.termType == "abbreviation":
                         yield (self.uri, RDF.type, ONTOLEX.Acronym)
@@ -280,100 +282,94 @@ class tbx2lemon(object):
 
             concept_id = concept.attrib["id"]
 
-            if "http" not in concept_id:
+            subjectField = None
+            for element in concept:
+                if (
+                    element.tag == QName(name="descrip")
+                    and element.attrib.get("type", "") == "subjectField"
+                ):
+                    subjectField = element.text
 
-                subjectField = None
-                for element in concept:
-                    if (
-                        element.tag == QName(name="descrip")
-                        and element.attrib.get("type", "") == "subjectField"
-                    ):
-                        subjectField = element.text
+            lemon_concepts.append(
+                LemonConcept(uri=concept_id, subjectField=subjectField)
+            )
 
-                lemon_concepts.append(
-                    LemonConcept(uri=uri + "/" + concept_id, subjectField=subjectField)
-                )
+            for langSec in concept:
+                if langSec.tag == QName(name="langSec"):
+                    lang = langSec.attrib.get(XML_LANG, None)
 
-                for langSec in concept:
-                    if langSec.tag == QName(name="langSec"):
-                        lang = langSec.attrib.get(XML_LANG, None)
+                    if lang not in lemon_lexicons.keys():
+                        lemon_lexicons[lang] = LemonLexicon(
+                            uri=uri + "/lexicon/" + lang, language=lang
+                        )
 
-                        if lang not in lemon_lexicons.keys():
-                            lemon_lexicons[lang] = LemonLexicon(
-                                uri=uri + "/lexicon/" + lang, language=lang
-                            )
-
-                        for termSec in langSec:
-                            lexicalEntry = LemonLexicalEntry(
-                                lexicon=lemon_lexicons[lang]
-                            )
-                            lexicalEntry.reference = uri + "/" + concept_id
-                            for element in termSec:
-                                if element.tag == QName(name="term"):
-                                    lemon_entry_uri = (
-                                        uri
-                                        + "/"
-                                        + "+".join(element.text.split(" "))
-                                        + "-"
-                                        + lang
-                                    )
-                                    lexicalEntry.set_uri(lemon_entry_uri)
-                                    lexicalEntry.term = element.text
-                                elif element.tag == QName(name="termNote"):
-                                    termnote_type = element.attrib.get("type", None)
-                                    if termnote_type == "termType":
-                                        lexicalEntry.termType = element.text
-                                    elif termnote_type == "termLemma":
-                                        lexicalEntry.termLemma = element.text
-                                    elif termnote_type == "partOfSpeech":
-                                        lexicalEntry.partOfSpeech = element.text
-                                    # administrativeStatus not yet done
-                                elif element.tag == QName(name="descrip"):
-                                    descrip_type = element.attrib.get("type", None)
-                                    if descrip_type == "reliabilityCode":
-                                        lexicalEntry.reliabilityCode = element.text
-                                    else:
-                                        logging.warning(
-                                            "descrip type not found: " + descrip_type
-                                        )
+                    for termSec in langSec:
+                        lexicalEntry = LemonLexicalEntry(
+                            lexicon=lemon_lexicons[lang]
+                        )
+                        lexicalEntry.reference = concept_id
+                        for element in termSec:
+                            if element.tag == QName(name="term"):
+                                lemon_entry_uri = (
+                                    uri
+                                    +"/lexicon/"+lang+"/"
+                                    +"+".join(element.text.split(" "))
+                                )
+                                lexicalEntry.set_uri(lemon_entry_uri)
+                                lexicalEntry.term = element.text
+                            elif element.tag == QName(name="termNote"):
+                                termnote_type = element.attrib.get("type", None)
+                                if termnote_type == "termType":
+                                    lexicalEntry.termType = element.text
+                                elif termnote_type == "termLemma":
+                                    lexicalEntry.termLemma = element.text
+                                elif termnote_type == "partOfSpeech":
+                                    lexicalEntry.partOfSpeech = [upos2olia.get(el, "UNKNOWN") for el in element.text.split(", ")]
+                                # administrativeStatus not yet done
+                            elif element.tag == QName(name="descrip"):
+                                descrip_type = element.attrib.get("type", None)
+                                if descrip_type == "reliabilityCode":
+                                    lexicalEntry.reliabilityCode = element.text
                                 else:
                                     logging.warning(
-                                        "termSec element not found: " + element.tag
+                                        "descrip type not found: " + descrip_type
                                     )
-
-                            lemon_entries.append(lexicalEntry)
-
-                            components = lexicalEntry.term.split(" ")
-                            if len(components) > 1:
-                                component_list = LemonComponentList(
-                                    # uri=lexicalEntry.uri+"#ComponentList",
-                                    uri=lexicalEntry.uri,
-                                    lexicalEntry=lexicalEntry,
+                            else:
+                                logging.warning(
+                                    "termSec element not found: " + element.tag
                                 )
-                                for idx, component in enumerate(components):
-                                    component_lexicalEntry = LemonLexicalEntry(
-                                        uri=uri + "/" + component + "-" + lang,
-                                        lexicon=lemon_lexicons[lang],
-                                        term=component,
-                                        partOfSpeech=lexicalEntry.partOfSpeech.split(
-                                            ", "
-                                        )[idx]
-                                        if lexicalEntry.partOfSpeech is not None
-                                        else None,
-                                    )
-                                    lemon_component = LemonComponent(
-                                        uri=lexicalEntry.uri
-                                        + "#component"
-                                        + str(idx + 1),
-                                        term=component,
-                                        lexicalEntry=component_lexicalEntry,
-                                    )
-                                    component_list.components.append(lemon_component)
-                                lemon_entries.append(component_list)
-                    # elif langSec.tag==QName(name="ref"):
-                    # elif langSec.tag==QName(name="descrip"):
-                    # else:
-                    #     logging.warning("conceptEntry element not found: " + langSec.tag)
+
+                        lemon_entries.append(lexicalEntry)
+
+                        components = lexicalEntry.term.split(" ")
+                        if len(components) > 1:
+                            component_list = LemonComponentList(
+                                # uri=lexicalEntry.uri+"#ComponentList",
+                                uri=lexicalEntry.uri,
+                                lexicalEntry=lexicalEntry,
+                            )
+                            for idx, component in enumerate(components):
+                                component_lexicalEntry = LemonLexicalEntry(
+                                    uri=uri+"/lexicon/"+lang+"/"+component,
+                                    lexicon=lemon_lexicons[lang],
+                                    term=component,
+                                    partOfSpeech=lexicalEntry.partOfSpeech[idx]
+                                    if lexicalEntry.partOfSpeech is not None
+                                    else None,
+                                )
+                                lemon_component = LemonComponent(
+                                    uri=lexicalEntry.uri
+                                    + "#component"
+                                    + str(idx + 1),
+                                    term=component,
+                                    lexicalEntry=component_lexicalEntry,
+                                )
+                                component_list.components.append(lemon_component)
+                            lemon_entries.append(component_list)
+                # elif langSec.tag==QName(name="ref"):
+                # elif langSec.tag==QName(name="descrip"):
+                # else:
+                #     logging.warning("conceptEntry element not found: " + langSec.tag)
 
         for triple in lemon_header.triples():
             self.graph.add(triple)
