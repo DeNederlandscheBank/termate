@@ -142,7 +142,7 @@ def create_tbx(t: TbxDocument = None, g: rdflib.Graph = None):
                 term = etree.SubElement(
                     term_sec,
                     QName(name="termNote"),
-                    attrib={},
+                    attrib={"type": "termType"},
                 )
                 term.text = "fullForm"
 
@@ -163,7 +163,7 @@ def create_tbx(t: TbxDocument = None, g: rdflib.Graph = None):
                         term = etree.SubElement(
                             term_sec,
                             QName(name="termNote"),
-                            attrib={},
+                            attrib={"type": "termType"}
                         )
                         if item2[0].upper() == item2[0]:
                             term.text = "abbreviation"

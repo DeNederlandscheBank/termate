@@ -36,3 +36,8 @@ History
 ------------------
 
 * Small correction in lemon conversion
+
+0.1.10 (2023-02-14)
+-------------------
+
+* Added Excel to SKOS converter
