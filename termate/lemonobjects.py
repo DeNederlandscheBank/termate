@@ -7,6 +7,7 @@ from rdflib import Graph
 from rdflib.term import URIRef, Literal, BNode
 from rdflib.namespace import RDF, RDFS, XSD, Namespace
 from .vocab import ONTOLEX, TBX, LEXINFO, DECOMP
+import iribaker
 
 # <http://lemon-model.net/lemon>
 #     a owl:Ontology ;
@@ -28,20 +29,37 @@ class LexicalEntry(object):
 
 
 class LemonBase(object):
-    """ """
+    """
+    A Lemon Base
 
-    def __init__(
-        self,
-        uri: URIRef = None,
-    ):
+    :param uri: the uri of the object
+
+    """
+
+    def __init__(self, uri: Union[URIRef, str] = None):
         self.set_uri(uri)
 
-    def set_uri(self, uri: URIRef = None):
-        self._uri = uri
+    def __eq__(self, other):
+        return self._uri == other._uri
 
     @property
     def uri(self):
-        return self._uri
+        """
+        Returns the uri of the object
+        """
+        if self._uri is not None:
+            return self._uri
+        else:
+            return None
+
+    def set_uri(self, uri: Union[URIRef, str] = None):
+        """
+        Sets the uri of the object. If the uri is a string then it is converted to an iri.
+        """
+        if isinstance(uri, str):
+            self._uri = URIRef(iribaker.to_iri(uri))
+        else:
+            self._uri = uri
 
 
 class LemonElement(object):
@@ -51,7 +69,9 @@ class LemonElement(object):
 
     """
 
-    def __init__(self, uri: URIRef = None, property: URIRef = None):
+    def __init__(self, 
+                 uri: URIRef = None, 
+                 property: URIRef = None):
         self.set_uri(uri)
         self.set_property(property)
 
@@ -646,7 +666,8 @@ class LexicalEntry(HasLanguage, HasPattern, LemonBase, LemonElement):
         self._lexicalVariant = lexicalVariant
 
     def set_otherForms(self, otherForms: list[Form] = None):
-        self._otherForms = otherForms
+        if otherForms != []:
+            self._otherForms = otherForms
 
     def add_abstractForm(self, abstractForm: Form = None):
         if self._abstractForms is None:
@@ -829,12 +850,11 @@ class LexicalEntry(HasLanguage, HasPattern, LemonBase, LemonElement):
             yield (self.uri, RDFS.label, Literal(self.label, self.language))
         if self.partOfSpeechs is not None:
             for line in self.partOfSpeechs:
-                for triple in line.triples():
-                    yield (
-                        self.uri,
-                        LEXINFO.partOfSpeech,
-                        Literal(self.partOfSpeech, self.language),
-                    )
+                yield (
+                    self.uri,
+                    LEXINFO.partOfSpeech,
+                    line,
+                )
         if self.termType is not None:
             yield (self.uri, TBX.termType, Literal(self.termType, self.language))
         if self.reliabilityCode is not None:

@@ -41,3 +41,9 @@ History
 -------------------
 
 * Added Excel to SKOS converter
+
+0.1.11 (2023-03-12)
+-------------------
+
+* Ontolex-Lemon RDF now contains the original SKOS
+* Bugfix in importing SKOS RDF

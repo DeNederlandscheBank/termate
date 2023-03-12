@@ -146,26 +146,26 @@ def create_tbx(t: TbxDocument = None, g: rdflib.Graph = None):
                 )
                 term.text = "fullForm"
 
-                altLabel = retrieve_skos(g, concept[0].n3(), "altLabel")
-                if altLabel is not None:
-                    for item2 in altLabel:
-                        term_sec = etree.SubElement(
-                            lang_sec,
-                            QName(name="termSec"),
-                            attrib={},
-                        )
-                        term = etree.SubElement(
-                            term_sec,
-                            QName(name="term"),
-                            attrib={},
-                        )
-                        term.text = item2[0].value
-                        term = etree.SubElement(
-                            term_sec,
-                            QName(name="termNote"),
-                            attrib={"type": "termType"}
-                        )
-                        if item2[0].upper() == item2[0]:
-                            term.text = "abbreviation"
-                        else:
-                            term.text = "variant"
+        altLabel = retrieve_skos(g, concept[0].n3(), "altLabel")
+        if altLabel is not None:
+            for item2 in altLabel:
+                term_sec = etree.SubElement(
+                    lang_sec,
+                    QName(name="termSec"),
+                    attrib={},
+                )
+                term = etree.SubElement(
+                    term_sec,
+                    QName(name="term"),
+                    attrib={},
+                )
+                term.text = item2[0].value
+                term = etree.SubElement(
+                    term_sec,
+                    QName(name="termNote"),
+                    attrib={"type": "termType"}
+                )
+                if item2[0].upper() == item2[0]:
+                    term.text = "abbreviation"
+                else:
+                    term.text = "variant"

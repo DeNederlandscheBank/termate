@@ -3,7 +3,6 @@
 from lxml import etree
 import xlsxwriter
 from io import StringIO
-import nafigator
 import logging
 from collections import defaultdict
 from copy import deepcopy
