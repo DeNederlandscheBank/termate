@@ -1427,18 +1427,18 @@ class Lexicon(HasLanguage, HasPattern, LemonBase, LemonElement):
 
     def set_entries(self, entries: list = None):
         if entries is not None:
-            self._entries = {entry.uri: entry for entry in entries}
+            self._entries = entries
         else:
-            self._entries = {}
+            self._entries = []
 
     @property
     def entries(self):
         # a rdf:Property, owl:ObjectProperty ;
         # rdfs:label "Eintrag"@de, "Entrada"@es, "Entry"@en, "Entrée"@fr, "Item"@nl ;
-        return list(self._entries.values())
+        return self._entries
 
     def add_entry(self, entry: LexicalEntry = None):
-        self._entries[entry.uri] = entry
+        self._entries.append(entry)
 
     def triples(self):
         yield (self.uri, RDF.type, ONTOLEX.Lexicon)
