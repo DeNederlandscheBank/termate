@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'termate'
-copyright = "2022, De Nederlandsche Bank"
+copyright = "2023, De Nederlandsche Bank"
 author = "Willem Jan Willemse"
 
 # The version info for the project you're documenting, acts as replacement
