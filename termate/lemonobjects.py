@@ -2,7 +2,7 @@
 
 import logging
 from collections import OrderedDict, deque
-from typing import Union
+from typing import Union, List
 from rdflib import Graph
 from rdflib.term import URIRef, Literal, BNode
 from rdflib.namespace import RDF, RDFS, XSD, Namespace
@@ -168,7 +168,7 @@ class Component(PhraseElement, LemonBase, LemonElement):
     def __init__(
         self,
         uri: URIRef = None,
-        correspondsTo: list[LexicalEntry] = None,
+        correspondsTo: List[LexicalEntry] = None,
     ):
         self.set_uri(uri=uri)
         # self.set_PhraseElement(PhraseElement=PhraseElement)
@@ -188,7 +188,7 @@ class Component(PhraseElement, LemonBase, LemonElement):
     def __repr__(self):
         return self.string_rep()
 
-    def set_correspondsTo(self, correspondsTo: list[LexicalEntry] = None):
+    def set_correspondsTo(self, correspondsTo: List[LexicalEntry] = None):
         self._correspondsTo = correspondsTo
 
     def add_correspondsTo(self, correspondsTo: LexicalEntry = None):
@@ -317,8 +317,8 @@ class Form(LemonBase, LemonElement):
         self,
         uri: URIRef = None,
         formVariant: str = None,
-        representations: list[str] = None,
-        writtenReps: list[str] = None,
+        representations: List[str] = None,
+        writtenReps: List[str] = None,
     ):
         self.set_uri(uri=uri)
         self.set_formVariant(formVariant)
@@ -347,10 +347,10 @@ class Form(LemonBase, LemonElement):
     def set_formVariant(self, formVariant: str = None):
         self._formVariant = formVariant
 
-    def set_representations(self, representations: list[str] = None):
+    def set_representations(self, representations: List[str] = None):
         self._representations = representations
 
-    def set_writtenReps(self, writtenReps: list[str] = None):
+    def set_writtenReps(self, writtenReps: List[str] = None):
         self._writtenReps = writtenReps
 
     def add_representation(self, representation: str = None):
@@ -567,18 +567,18 @@ class LexicalEntry(HasLanguage, HasPattern, LemonBase, LemonElement):
         uri: URIRef = None,
         language: str = None,
         pattern: URIRef = None,
-        abstractForms: list[Form] = None,
+        abstractForms: List[Form] = None,
         canonicalForm: Form = None,
-        lexicalForms: list[Form] = None,
-        otherForms: list[Form] = None,
-        lexicalVariant: list[LexicalEntry] = None,
+        lexicalForms: List[Form] = None,
+        otherForms: List[Form] = None,
+        lexicalVariant: List[LexicalEntry] = None,
         constituents: list = None,
         decomposition: ComponentList = None,
         # phraseRoot: Node = None,
-        senses: list[LexicalSense] = None,
+        senses: List[LexicalSense] = None,
         # synBehavior: Frame = None
         label: str = None,
-        partOfSpeechs: list[str] = None,
+        partOfSpeechs: List[str] = None,
         termType: str = None,
         reliabilityCode: int = None,
     ):
@@ -647,7 +647,7 @@ class LexicalEntry(HasLanguage, HasPattern, LemonBase, LemonElement):
     def __repr__(self):
         return self.string_rep()
 
-    def set_abstractForms(self, abstractForms: list[Form] = None):
+    def set_abstractForms(self, abstractForms: List[Form] = None):
         self._abstractForms = abstractForms
 
     def set_canonicalForm(self, canonicalForm: Form = None):
@@ -659,13 +659,13 @@ class LexicalEntry(HasLanguage, HasPattern, LemonBase, LemonElement):
     def set_decomposition(self, decomposition: ComponentList = None):
         self._decomposition = decomposition
 
-    def set_lexicalForms(self, lexicalForms: list[Form] = None):
+    def set_lexicalForms(self, lexicalForms: List[Form] = None):
         self._lexicalForms = lexicalForms
 
-    def set_lexicalVariant(self, lexicalVariant: list[LexicalEntry] = None):
+    def set_lexicalVariant(self, lexicalVariant: List[LexicalEntry] = None):
         self._lexicalVariant = lexicalVariant
 
-    def set_otherForms(self, otherForms: list[Form] = None):
+    def set_otherForms(self, otherForms: List[Form] = None):
         if otherForms != []:
             self._otherForms = otherForms
 
@@ -699,7 +699,7 @@ class LexicalEntry(HasLanguage, HasPattern, LemonBase, LemonElement):
     # def set_phraseRoot(self, phraseRoot: Node = None):
     #     self._phraseRoot = phraseRoot
 
-    def set_senses(self, senses: list[LexicalSense] = None):
+    def set_senses(self, senses: List[LexicalSense] = None):
         self._senses = senses
 
     def add_sense(self, sense: LexicalSense = None):
