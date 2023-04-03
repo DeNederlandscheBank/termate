@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Literal as TypeLiteral
-from typing import Optional
+from typing import Optional, Dict
 
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
@@ -22,7 +22,7 @@ from .utils import (
     validate_with_profile,
 )
 
-def extract_prefixes(sheet: Worksheet) -> dict[str, Namespace]:
+def extract_prefixes(sheet: Worksheet) -> Dict[str, Namespace]:
     prefixes = {}
     i = 3
     while True:
