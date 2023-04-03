@@ -13,3 +13,5 @@ nafigator
 iribaker
 termate
 regex
+syntok
+pyshacl
