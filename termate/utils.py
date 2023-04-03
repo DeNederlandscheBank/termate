@@ -6,7 +6,6 @@ This module contains utility functions termate package
 
 """
 
-
 def merge_terms_dict(a, b):
     for key in b.keys():
         if key in a.keys() and a[key]["dc:language"] == b[key]["dc:language"]:
@@ -157,7 +156,7 @@ def all_strings_in_list_are_iris(l_: []) -> Tuple[bool, str]:
         return True, ""
 
 
-def expand_namespaces(s: str, prefixes: dict[str, Namespace]) -> Union[URIRef, str]:
+def expand_namespaces(s: str, prefixes: Dict[str, Namespace]) -> Union[URIRef, str]:
     for pre in prefixes.keys():
         if s.startswith(pre):
             return URIRef(s.replace(pre, prefixes[pre]))
@@ -167,7 +166,7 @@ def expand_namespaces(s: str, prefixes: dict[str, Namespace]) -> Union[URIRef, s
         return s
 
 
-def bind_namespaces(g: Graph, prefixes: dict[str, Namespace]):
+def bind_namespaces(g: Graph, prefixes: Dict[str, Namespace]):
     for pre, ns in prefixes.items():
         g.bind(pre.rstrip(":"), ns)
 
@@ -205,7 +204,7 @@ def make_agent(agent_value, agent_role, prefixes, iri_of_subject) -> Graph:
     return ag
 
 
-def make_iri(s: str, prefixes: dict[str, Namespace]):
+def make_iri(s: str, prefixes: Dict[str, Namespace]):
     iri = expand_namespaces(s, prefixes)
     iri_conv = string_is_http_iri(str(iri))
     if not iri_conv[0]:
