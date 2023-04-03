@@ -16,3 +16,4 @@ regex
 syntok
 pyshacl
 colorama
+pydantic
