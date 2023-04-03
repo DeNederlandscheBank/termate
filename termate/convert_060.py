@@ -179,13 +179,17 @@ def extract_collections(sheet: Worksheet, prefixes) -> Graph:
             raise ConversionError(iri_conv[1])
         if pref_label is None:
             raise ConversionError(f"You must provide a Preferred Label for Collection {iri_s}")
-        if definition is None:
-            raise ConversionError(f"You must provide a Definition for Collection {iri_s}")
+        # if definition is None:
+        #     raise ConversionError(f"You must provide a Definition for Collection {iri_s}")
 
         # create Graph
-        g.add((iri, RDF.type, SKOS.Concept))
-        g.add((iri, SKOS.prefLabel, Literal(pref_label[0-3], lang=pref_label[-2::])))
-        g.add((iri, SKOS.definition, Literal(definition, lang=pref_label[-2::])))
+        g.add((iri, RDF.type, SKOS.Collection))
+
+        pref_labels = pref_label.split(",")
+        for label in pre_labels:
+            g.add((iri, SKOS.prefLabel, Literal(label[0:-3], lang=label[-2::])))
+        if definition is not None:
+            g.add((iri, SKOS.definition, Literal(definition, lang=pref_label[-2::])))
 
         if members is not None:
             for n in split_and_tidy_to_iris(members, prefixes):

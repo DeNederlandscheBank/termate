@@ -47,3 +47,8 @@ History
 
 * Ontolex-Lemon RDF now contains the original SKOS
 * Bugfix in importing SKOS RDF
+
+0.1.13 (2023-03-30)
+-------------------
+
+* Bugfixes in importing SKOS Excel to SKOS RDF
